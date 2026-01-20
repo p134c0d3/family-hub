@@ -1,0 +1,143 @@
+<% content_for(:title) { "Edit #{@chat.name} - Family Hub" } %>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="flex items-center gap-3 mb-6">
+    <%= link_to chat_path(@chat), class: "p-2 -ml-2 text-theme-secondary hover:text-theme-text hover:bg-theme-surface rounded-lg transition-colors" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    <% end %>
+    <h1 class="text-2xl font-bold text-theme-text">Edit Group Chat</h1>
+  </div>
+
+  <!-- Chat Settings -->
+  <div class="card p-6 mb-6">
+    <h2 class="text-lg font-semibold text-theme-text mb-4">Chat Settings</h2>
+
+    <%= form_with model: @chat, class: "space-y-4" do |f| %>
+      <div>
+        <%= f.label :name, "Group Name", class: "label" %>
+        <%= f.text_field :name, class: "input", placeholder: "e.g., Family Planning", required: true %>
+      </div>
+
+      <div>
+        <%= f.submit "Save Changes", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Members -->
+  <div class="card p-6 mb-6">
+    <h2 class="text-lg font-semibold text-theme-text mb-4">Members (<%= @chat.members.count %>)</h2>
+
+    <div class="space-y-2">
+      <% @chat.members.each do |member| %>
+        <div class="flex items-center justify-between p-3 rounded-[15px] hover:bg-theme-background transition-colors">
+          <div class="flex items-center gap-3">
+            <% if member.avatar.attached? %>
+              <%= image_tag member.avatar, class: "w-10 h-10 rounded-full object-cover" %>
+            <% else %>
+              <div class="w-10 h-10 rounded-full bg-theme-primary/20 flex items-center justify-center">
+                <span class="text-theme-primary font-medium"><%= member.initials %></span>
+              </div>
+            <% end %>
+            <div>
+              <p class="font-medium text-theme-text">
+                <%= member.full_name %>
+                <% if member == @chat.created_by %>
+                  <span class="badge badge-secondary ml-2">Creator</span>
+                <% end %>
+                <% if member == current_user %>
+                  <span class="text-theme-secondary">(you)</span>
+                <% end %>
+              </p>
+              <p class="text-sm text-theme-secondary"><%= member.city %></p>
+            </div>
+          </div>
+
+          <% if member != @chat.created_by && member != current_user %>
+            <%= button_to remove_member_chat_path(@chat, user_id: member.id),
+                method: :delete,
+                data: { turbo_confirm: "Remove #{member.full_name} from this chat?" },
+                class: "text-theme-secondary hover:text-red-500 transition-colors" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Add Member -->
+  <% non_members = @users.reject { |u| @chat.member?(u) } %>
+  <% if non_members.any? %>
+    <div class="card p-6 mb-6">
+      <h2 class="text-lg font-semibold text-theme-text mb-4">Add Member</h2>
+
+      <div class="space-y-2">
+        <% non_members.each do |user| %>
+          <%= form_with url: add_member_chat_path(@chat), method: :post, class: "group" do |f| %>
+            <%= f.hidden_field :user_id, value: user.id %>
+            <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-[15px] hover:bg-theme-background transition-colors text-left">
+              <% if user.avatar.attached? %>
+                <%= image_tag user.avatar, class: "w-10 h-10 rounded-full object-cover" %>
+              <% else %>
+                <div class="w-10 h-10 rounded-full bg-theme-primary/20 flex items-center justify-center">
+                  <span class="text-theme-primary font-medium"><%= user.initials %></span>
+                </div>
+              <% end %>
+              <div class="flex-1">
+                <p class="font-medium text-theme-text"><%= user.full_name %></p>
+                <p class="text-sm text-theme-secondary"><%= user.city %></p>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-secondary group-hover:text-theme-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Danger Zone -->
+  <div class="card p-6 border-red-200 dark:border-red-900">
+    <h2 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Danger Zone</h2>
+
+    <div class="space-y-4">
+      <!-- Leave Chat -->
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="font-medium text-theme-text">Leave Chat</p>
+          <p class="text-sm text-theme-secondary">You will no longer receive messages from this chat</p>
+        </div>
+        <%= button_to leave_chat_path(@chat),
+            method: :post,
+            data: { turbo_confirm: "Are you sure you want to leave this chat?" },
+            class: "btn btn-secondary text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" do %>
+          Leave
+        <% end %>
+      </div>
+
+      <% if @chat.created_by == current_user || current_user.admin? %>
+        <hr class="border-theme-border">
+
+        <!-- Delete Chat -->
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-medium text-theme-text">Delete Chat</p>
+            <p class="text-sm text-theme-secondary">Permanently delete this chat and all messages</p>
+          </div>
+          <%= button_to chat_path(@chat),
+              method: :delete,
+              data: { turbo_confirm: "Are you sure? This will permanently delete this chat and all messages." },
+              class: "btn bg-red-600 hover:bg-red-700 text-white" do %>
+            Delete
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

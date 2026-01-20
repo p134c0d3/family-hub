@@ -1,0 +1,55 @@
+<% content_for(:title) { "My Profile - Family Hub" } %>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="card overflow-hidden">
+    <%# Profile header %>
+    <div class="bg-gradient-to-r from-primary-500 to-accent-500 h-32"></div>
+
+    <div class="px-6 pb-6">
+      <%# Avatar %>
+      <div class="-mt-16 mb-4">
+        <div class="avatar avatar-xl ring-4 ring-white dark:ring-surface-800">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar, alt: @user.full_name %>
+          <% else %>
+            <%= @user.initials %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Name and info %>
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-theme-text"><%= @user.full_name %></h1>
+          <p class="text-theme-secondary"><%= @user.email %></p>
+        </div>
+        <%= link_to edit_profile_path, class: "btn btn-secondary" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+          Edit Profile
+        <% end %>
+      </div>
+
+      <%# Profile details %>
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-theme-secondary">Location</p>
+          <p class="text-theme-text"><%= @user.city %></p>
+        </div>
+        <div>
+          <p class="text-sm text-theme-secondary">Birthday</p>
+          <p class="text-theme-text"><%= @user.date_of_birth.strftime("%B %d, %Y") %></p>
+        </div>
+        <div>
+          <p class="text-sm text-theme-secondary">Member since</p>
+          <p class="text-theme-text"><%= @user.created_at.strftime("%B %Y") %></p>
+        </div>
+        <div>
+          <p class="text-sm text-theme-secondary">Role</p>
+          <p class="text-theme-text"><%= @user.role.capitalize %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

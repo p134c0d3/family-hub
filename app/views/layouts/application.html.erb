@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" data-controller="theme" data-theme-color-mode-value="<%= current_user&.color_mode || 'system' %>">
+  <head>
+    <title><%= content_for(:title) || "Family Hub" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Family Hub">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps %>
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <%# Inline script to prevent flash of wrong theme %>
+    <script>
+      (function() {
+        const colorMode = localStorage.getItem('colorMode') || 'system';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (colorMode === 'dark' || (colorMode === 'system' && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+
+        // Prevent transition flash on page load
+        document.documentElement.classList.add('no-transition');
+        window.addEventListener('DOMContentLoaded', () => {
+          requestAnimationFrame(() => {
+            document.documentElement.classList.remove('no-transition');
+          });
+        });
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-theme-background antialiased">
+    <% if logged_in? %>
+      <%= render "shared/navbar" %>
+    <% end %>
+
+    <%= render "shared/flash_messages" %>
+
+    <main class="<%= logged_in? ? 'pt-16' : '' %>">
+      <%= yield %>
+    </main>
+
+    <%# Turbo Frame for modals %>
+    <%= turbo_frame_tag "modal" %>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<%# Reactions bar - shows existing reactions with counts %>
+<% is_own_message = message.user == current_user %>
+<% grouped = message.grouped_reactions %>
+
+<div id="message_<%= message.id %>_reactions" class="<%= grouped.any? ? 'mt-1' : '' %> <%= is_own_message ? 'flex justify-end' : '' %>">
+  <% if grouped.any? %>
+    <div class="flex flex-wrap gap-1">
+      <% grouped.each do |emoji, count| %>
+        <% user_reacted = message.reacted_by?(current_user, emoji) %>
+        <%= form_with url: chat_message_reactions_path(message.chat, message),
+            method: :post,
+            class: "inline",
+            data: { turbo_frame: "_top" } do |f| %>
+          <%= f.hidden_field :emoji, value: emoji %>
+          <button type="submit"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors
+                         <%= user_reacted ? 'bg-theme-primary/20 border border-theme-primary/50 text-theme-primary' : 'bg-theme-surface border border-theme-border text-theme-text hover:border-theme-primary/50' %>">
+            <span><%= emoji %></span>
+            <span><%= count %></span>
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

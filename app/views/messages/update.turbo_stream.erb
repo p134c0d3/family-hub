@@ -1,0 +1,6 @@
+<%# Turbo Stream response for updating a message %>
+
+<%# Replace the message with updated content %>
+<%= turbo_stream.replace dom_id(@message) do %>
+  <%= render partial: 'messages/message', locals: { message: @message, current_user: current_user } %>
+<% end %>

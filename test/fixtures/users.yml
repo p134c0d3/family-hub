@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  email: MyString
+  password_digest: MyString
+  first_name: MyString
+  last_name: MyString
+  date_of_birth: 2026-01-19
+  city: MyString
+  role: MyString
+  status: MyString
+  password_changed: false
+  color_mode: MyString
+  notify_in_app: false
+  notify_email: false
+  notify_push: false
+  encryption_key_salt: MyString
+
+two:
+  email: MyString
+  password_digest: MyString
+  first_name: MyString
+  last_name: MyString
+  date_of_birth: 2026-01-19
+  city: MyString
+  role: MyString
+  status: MyString
+  password_changed: false
+  color_mode: MyString
+  notify_in_app: false
+  notify_email: false
+  notify_push: false
+  encryption_key_salt: MyString

@@ -1,0 +1,85 @@
+<%# Chat list item partial - displays a single chat in the sidebar list %>
+<%# locals: chat, current_user, active (boolean) %>
+
+<% active ||= false %>
+
+<%= link_to chats_path(active_chat: chat.id),
+    class: "block p-3 rounded-[15px] transition-colors #{active ? 'bg-theme-primary/10' : 'hover:bg-theme-surface/80'}",
+    data: {
+      chat_list_target: "chatItem",
+      chat_id: chat.id,
+      turbo_frame: "chat_conversation",
+      turbo_action: "advance"
+    } do %>
+  <div class="flex items-center gap-3">
+    <%# Avatar or group icon %>
+    <div class="flex-shrink-0">
+      <% if chat.direct? %>
+        <% other = chat.other_member(current_user) %>
+        <% if other&.avatar&.attached? %>
+          <%= image_tag other.avatar, class: "w-10 h-10 rounded-full object-cover" %>
+        <% else %>
+          <div class="w-10 h-10 rounded-full bg-theme-primary/20 flex items-center justify-center">
+            <span class="text-theme-primary font-medium"><%= other&.initials || '?' %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="w-10 h-10 rounded-[15px] bg-theme-primary/20 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Chat info %>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-medium text-theme-text truncate text-sm">
+          <%= chat.display_name(current_user) %>
+        </h3>
+        <% if chat.last_message %>
+          <span class="text-[10px] text-theme-secondary whitespace-nowrap">
+            <%= time_ago_in_words(chat.last_message.created_at) %>
+          </span>
+        <% end %>
+      </div>
+
+      <%# Last message preview %>
+      <div data-chat-preview>
+        <% if chat.last_message %>
+          <p class="text-xs text-theme-secondary truncate">
+            <% if chat.last_message.user == current_user %>
+              <span class="text-theme-text">You:</span>
+            <% else %>
+              <span class="text-theme-text"><%= chat.last_message.user.first_name %>:</span>
+            <% end %>
+            <%= truncate(chat.last_message.display_content, length: 40) %>
+          </p>
+        <% else %>
+          <p class="text-xs text-theme-secondary italic">No messages yet</p>
+        <% end %>
+      </div>
+
+      <%# Typing indicator (shown when someone is typing) %>
+      <div data-chat-typing class="hidden">
+        <p class="text-xs text-theme-primary flex items-center gap-1">
+          <span class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="typing-text"></span>
+        </p>
+      </div>
+    </div>
+
+    <%# Unread badge %>
+    <% unread = chat.unread_count_for(current_user) %>
+    <% if unread > 0 %>
+      <div data-unread-badge class="flex-shrink-0 w-5 h-5 rounded-full bg-theme-primary text-white text-[10px] flex items-center justify-center font-medium">
+        <%= unread > 99 ? '99+' : unread %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

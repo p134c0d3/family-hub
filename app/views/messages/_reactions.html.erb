@@ -1,0 +1,11 @@
+<%# Reactions partial for a message %>
+<% if message.reactions.any? %>
+  <div class="flex flex-wrap gap-1">
+    <% message.grouped_reactions.each do |emoji, count| %>
+      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-theme-surface border border-theme-border">
+        <span><%= emoji %></span>
+        <span class="ml-1 text-theme-secondary"><%= count %></span>
+      </span>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,6 @@
+<%# Turbo Stream response for deleting (soft delete) a message %>
+
+<%# Replace the message with deleted version %>
+<%= turbo_stream.replace dom_id(@message) do %>
+  <%= render partial: 'messages/message', locals: { message: @message, current_user: current_user } %>
+<% end %>

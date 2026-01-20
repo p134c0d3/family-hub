@@ -1,0 +1,176 @@
+<%# Message partial for displaying a single message %>
+<% is_own_message = message.user == current_user %>
+
+<div id="<%= dom_id(message) %>" class="group flex gap-3 <%= is_own_message ? 'flex-row-reverse' : '' %>">
+  <!-- Avatar -->
+  <div class="flex-shrink-0">
+    <% if message.user.avatar.attached? %>
+      <%= image_tag message.user.avatar, class: "w-8 h-8 rounded-full object-cover" %>
+    <% else %>
+      <div class="w-8 h-8 rounded-full bg-theme-primary/20 flex items-center justify-center">
+        <span class="text-theme-primary text-xs font-medium"><%= message.user.initials %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Message content -->
+  <div class="flex-1 max-w-[75%] flex flex-col <%= is_own_message ? 'items-end' : 'items-start' %>">
+    <!-- Header with name and time -->
+    <div class="flex items-center gap-2 mb-1 <%= is_own_message ? 'flex-row-reverse' : '' %>">
+      <span class="text-sm font-medium text-theme-text"><%= message.user.first_name %></span>
+      <span class="text-xs text-theme-secondary"><%= message.created_at.strftime("%l:%M %p") %></span>
+      <% if message.edited? %>
+        <span class="text-xs text-theme-secondary italic">(edited)</span>
+      <% end %>
+    </div>
+
+    <!-- Reply preview (Google Messages style) -->
+    <% if message.reply? && message.parent_message %>
+      <% parent = message.parent_message %>
+      <button type="button"
+              onclick="document.getElementById('<%= dom_id(parent) %>')?.scrollIntoView({ behavior: 'smooth', block: 'center' })"
+              class="group/reply mb-2 max-w-full cursor-pointer text-left">
+        <div class="flex rounded-lg overflow-hidden <%= is_own_message ? 'bg-theme-primary/10' : 'bg-theme-surface' %>">
+          <%# Accent bar - always full primary color for visibility %>
+          <div class="w-1 flex-shrink-0 bg-theme-primary"></div>
+
+          <%# Reply content %>
+          <div class="flex-1 px-3 py-2 min-w-0">
+            <p class="text-xs font-medium <%= is_own_message ? 'text-theme-primary' : 'text-theme-primary' %> mb-0.5">
+              <%= parent.user == current_user ? 'You' : parent.user.first_name %>
+            </p>
+            <% if parent.deleted? %>
+              <p class="text-xs text-theme-secondary italic truncate">Message deleted</p>
+            <% elsif parent.content.present? %>
+              <p class="text-xs text-theme-secondary truncate"><%= truncate(parent.content, length: 80) %></p>
+            <% elsif parent.has_attachments? %>
+              <p class="text-xs text-theme-secondary truncate flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <% images_count = parent.attachments.select { |a| Message.image?(a) }.count %>
+                <% videos_count = parent.attachments.select { |a| Message.video?(a) }.count %>
+                <% docs_count = parent.attachments.select { |a| Message.document?(a) }.count %>
+                <span>
+                  <%= [
+                    images_count > 0 ? pluralize(images_count, 'photo') : nil,
+                    videos_count > 0 ? pluralize(videos_count, 'video') : nil,
+                    docs_count > 0 ? pluralize(docs_count, 'file') : nil
+                  ].compact.join(', ') %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        </div>
+      </button>
+    <% end %>
+
+    <!-- Message bubble -->
+    <% if message.deleted? %>
+      <div class="message-bubble <%= is_own_message ? 'message-bubble-sent' : 'message-bubble-received' %>">
+        <p class="italic text-theme-secondary"><%= message.display_content %></p>
+      </div>
+    <% else %>
+      <%# Text content (if present) %>
+      <% if message.content.present? %>
+        <div class="message-bubble <%= is_own_message ? 'message-bubble-sent' : 'message-bubble-received' %>">
+          <p class="whitespace-pre-wrap break-words"><%= message.content %></p>
+        </div>
+      <% end %>
+
+      <%# Attachments %>
+      <% if message.has_attachments? %>
+        <div class="<%= message.content.present? ? 'mt-2' : '' %>">
+          <%= render 'messages/attachments', message: message, is_own_message: is_own_message %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <!-- Reactions bar -->
+    <%= render 'messages/reactions_bar', message: message, current_user: current_user %>
+
+    <!-- Actions (visible on hover) -->
+    <% unless message.deleted? %>
+      <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 mt-1 <%= is_own_message ? 'justify-end' : '' %>">
+        <!-- Emoji picker -->
+        <div data-controller="emoji-picker" data-emoji-picker-message-id-value="<%= message.id %>" data-emoji-picker-chat-id-value="<%= message.chat_id %>" class="relative">
+          <button type="button"
+                  data-action="click->emoji-picker#toggle"
+                  data-emoji-picker-target="button"
+                  class="p-1 text-theme-secondary hover:text-theme-text hover:bg-theme-surface rounded transition-colors"
+                  title="Add reaction">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+
+          <!-- Emoji picker popup -->
+          <div data-emoji-picker-target="picker"
+               class="hidden absolute bottom-full mb-2 <%= is_own_message ? 'right-0' : 'left-0' %> bg-theme-surface border border-theme-border rounded-[15px] shadow-lg z-50 w-72">
+            <% # Quick reactions %>
+            <div class="flex gap-1 p-2 border-b border-theme-border">
+              <% MessageReaction::QUICK_EMOJIS.each do |emoji| %>
+                <%= form_with url: chat_message_reactions_path(message.chat, message), method: :post, data: { turbo_frame: "_top" }, class: "inline" do |f| %>
+                  <%= f.hidden_field :emoji, value: emoji %>
+                  <button type="submit"
+                          data-action="click->emoji-picker#select"
+                          class="p-1.5 text-xl hover:bg-theme-background rounded-lg transition-colors">
+                    <%= emoji %>
+                  </button>
+                <% end %>
+              <% end %>
+            </div>
+
+            <% # Full emoji grid with categories %>
+            <div class="max-h-48 overflow-y-auto p-2">
+              <% MessageReaction::EMOJI_CATEGORIES.each do |category, emojis| %>
+                <div class="mb-2">
+                  <div class="text-xs text-theme-secondary font-medium mb-1 sticky top-0 bg-theme-surface"><%= category %></div>
+                  <div class="grid grid-cols-8 gap-0.5">
+                    <% emojis.each do |emoji| %>
+                      <%= form_with url: chat_message_reactions_path(message.chat, message), method: :post, data: { turbo_frame: "_top" }, class: "inline" do |f| %>
+                        <%= f.hidden_field :emoji, value: emoji %>
+                        <button type="submit"
+                                data-action="click->emoji-picker#select"
+                                class="p-1 text-lg hover:bg-theme-background rounded transition-colors">
+                          <%= emoji %>
+                        </button>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reply button -->
+        <button type="button"
+                data-action="click->chat#startReply"
+                data-message-id="<%= message.id %>"
+                data-message-author="<%= message.user.first_name %>"
+                data-message-content="<%= message.deleted? ? 'Message deleted' : truncate(message.content.to_s, length: 80, escape: false) %>"
+                data-message-has-attachments="<%= message.has_attachments? %>"
+                class="p-1 text-theme-secondary hover:text-theme-text hover:bg-theme-surface rounded transition-colors"
+                title="Reply">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+          </svg>
+        </button>
+
+        <% if is_own_message %>
+          <!-- Delete button -->
+          <%= button_to chat_message_path(message.chat, message),
+              method: :delete,
+              data: { turbo_confirm: "Delete this message?" },
+              class: "p-1 text-theme-secondary hover:text-red-500 hover:bg-theme-surface rounded transition-colors",
+              title: "Delete" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

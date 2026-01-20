@@ -1,0 +1,113 @@
+<% content_for(:title) { "Access Requests - Admin - Family Hub" } %>
+<% content_for(:page_title) { "Access Requests" } %>
+
+<%# Pending requests %>
+<div class="mb-8">
+  <h2 class="text-lg font-semibold text-theme-text mb-4">
+    Pending Requests
+    <% if @pending_requests.any? %>
+      <span class="badge badge-warning ml-2"><%= @pending_requests.count %></span>
+    <% end %>
+  </h2>
+
+  <% if @pending_requests.any? %>
+    <div class="card divide-y divide-theme">
+      <% @pending_requests.each do |request| %>
+        <div class="p-4 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="avatar avatar-md bg-warning-50 text-warning-600">
+              <%= request.first_name[0] %><%= request.last_name[0] %>
+            </div>
+            <div>
+              <p class="font-medium text-theme-text"><%= request.full_name %></p>
+              <p class="text-sm text-theme-secondary"><%= request.email %></p>
+              <p class="text-xs text-theme-muted">
+                <%= request.city %> &middot; Submitted <%= time_ago_in_words(request.created_at) %> ago
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <%= link_to admin_access_request_path(request), class: "btn btn-secondary btn-sm" do %>
+              Review
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card p-8 text-center text-theme-secondary">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-sm">No pending access requests</p>
+    </div>
+  <% end %>
+</div>
+
+<%# Recent approved %>
+<div class="mb-8">
+  <h2 class="text-lg font-semibold text-theme-text mb-4">Recently Approved</h2>
+
+  <% if @approved_requests.any? %>
+    <div class="card divide-y divide-theme">
+      <% @approved_requests.each do |request| %>
+        <div class="p-4 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="avatar avatar-md bg-success-50 text-success-600">
+              <%= request.first_name[0] %><%= request.last_name[0] %>
+            </div>
+            <div>
+              <p class="font-medium text-theme-text"><%= request.full_name %></p>
+              <p class="text-sm text-theme-secondary"><%= request.email %></p>
+              <p class="text-xs text-theme-muted">
+                Approved <%= time_ago_in_words(request.reviewed_at) %> ago
+                <% if request.reviewed_by %>
+                  by <%= request.reviewed_by.first_name %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+          <span class="badge badge-success">Approved</span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card p-6 text-center text-theme-secondary">
+      <p class="text-sm">No recent approvals</p>
+    </div>
+  <% end %>
+</div>
+
+<%# Recent denied %>
+<div>
+  <h2 class="text-lg font-semibold text-theme-text mb-4">Recently Denied</h2>
+
+  <% if @denied_requests.any? %>
+    <div class="card divide-y divide-theme">
+      <% @denied_requests.each do |request| %>
+        <div class="p-4 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="avatar avatar-md bg-danger-50 text-danger-600">
+              <%= request.first_name[0] %><%= request.last_name[0] %>
+            </div>
+            <div>
+              <p class="font-medium text-theme-text"><%= request.full_name %></p>
+              <p class="text-sm text-theme-secondary"><%= request.email %></p>
+              <p class="text-xs text-theme-muted">
+                Denied <%= time_ago_in_words(request.reviewed_at) %> ago
+                <% if request.reviewed_by %>
+                  by <%= request.reviewed_by.first_name %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+          <span class="badge badge-danger">Denied</span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card p-6 text-center text-theme-secondary">
+      <p class="text-sm">No recent denials</p>
+    </div>
+  <% end %>
+</div>

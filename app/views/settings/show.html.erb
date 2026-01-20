@@ -1,0 +1,77 @@
+<% content_for(:title) { "Settings - Family Hub" } %>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-theme-text mb-6">Settings</h1>
+
+  <%= form_with model: @user, url: settings_path, method: :patch, local: true do |f| %>
+    <%# Appearance section %>
+    <div class="card p-6 mb-6">
+      <h2 class="text-lg font-semibold text-theme-text mb-4">Appearance</h2>
+
+      <div class="space-y-4">
+        <div>
+          <%= f.label :color_mode, "Color Mode", class: "form-label" %>
+          <%= f.select :color_mode,
+              options_for_select([
+                ["System (follow device)", "system"],
+                ["Light", "light"],
+                ["Dark", "dark"]
+              ], @user.color_mode),
+              {},
+              class: "input" %>
+          <p class="form-hint">Choose how Family Hub looks on your device.</p>
+        </div>
+      </div>
+    </div>
+
+    <%# Notifications section %>
+    <div class="card p-6 mb-6">
+      <h2 class="text-lg font-semibold text-theme-text mb-4">Notifications</h2>
+
+      <div class="space-y-4">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <%= f.check_box :notify_in_app, class: "w-5 h-5 rounded border-theme text-theme-primary focus:ring-theme-primary" %>
+          <div>
+            <span class="text-theme-text font-medium">In-app notifications</span>
+            <p class="text-sm text-theme-secondary">Show notifications within the app</p>
+          </div>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <%= f.check_box :notify_email, class: "w-5 h-5 rounded border-theme text-theme-primary focus:ring-theme-primary" %>
+          <div>
+            <span class="text-theme-text font-medium">Email notifications</span>
+            <p class="text-sm text-theme-secondary">Receive email updates for important events</p>
+          </div>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-not-allowed opacity-50">
+          <%= f.check_box :notify_push, disabled: true, class: "w-5 h-5 rounded border-theme" %>
+          <div>
+            <span class="text-theme-text font-medium">Push notifications</span>
+            <p class="text-sm text-theme-secondary">Coming soon with mobile app</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <%# Security section %>
+    <div class="card p-6 mb-6">
+      <h2 class="text-lg font-semibold text-theme-text mb-4">Security</h2>
+
+      <div>
+        <%= link_to change_password_path, class: "btn btn-secondary" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+          </svg>
+          Change Password
+        <% end %>
+      </div>
+    </div>
+
+    <%# Save button %>
+    <div class="flex justify-end">
+      <%= f.submit "Save Settings", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

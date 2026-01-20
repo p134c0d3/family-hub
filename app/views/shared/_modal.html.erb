@@ -1,0 +1,70 @@
+<%
+  # Modal Component
+  #
+  # Required: id (unique ID for the modal)
+  # Optional: title, size ("sm"|"md"|"lg"|"xl"|"2xl"), show_close (default true)
+  #
+  # Trigger with: onclick="document.getElementById('modal-id').querySelector('[data-controller=modal]').dispatchEvent(new CustomEvent('modal:open'))"
+
+  size ||= "md"
+  show_close = true if local_assigns[:show_close].nil?
+
+  size_classes = {
+    "sm" => "max-w-sm",
+    "md" => "max-w-md",
+    "lg" => "max-w-lg",
+    "xl" => "max-w-xl",
+    "2xl" => "max-w-2xl"
+  }
+%>
+
+<div id="<%= id %>"
+     data-controller="modal"
+     class="contents">
+
+  <div data-modal-target="container"
+       class="hidden fixed inset-0 z-50 overflow-y-auto">
+
+    <div data-modal-target="backdrop"
+         data-action="click->modal#close"
+         class="fixed inset-0 bg-black/50 transition-opacity duration-200 opacity-0">
+    </div>
+
+    <div class="flex min-h-full items-center justify-center p-4">
+
+      <div data-modal-target="dialog"
+           class="relative w-full <%= size_classes[size] %> bg-theme-surface rounded-[15px] shadow-xl
+                  transform transition-all duration-200 opacity-0 scale-95"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="<%= id %>-title">
+
+        <% if local_assigns[:title] || show_close %>
+          <div class="flex items-center justify-between p-4 border-b border-theme-border">
+            <% if local_assigns[:title] %>
+              <h3 id="<%= id %>-title" class="text-lg font-semibold text-theme-text">
+                <%= title %>
+              </h3>
+            <% else %>
+              <div></div>
+            <% end %>
+
+            <% if show_close %>
+              <button type="button"
+                      data-action="click->modal#close"
+                      class="p-1 text-theme-secondary hover:text-theme-text rounded-lg hover:bg-theme-background transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="p-4">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

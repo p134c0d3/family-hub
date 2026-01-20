@@ -1,0 +1,97 @@
+<% content_for(:title) { "Request Access - Family Hub" } %>
+
+<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-theme-background">
+  <div class="w-full max-w-md">
+    <%# Logo and title %>
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-card bg-theme-primary-light mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-theme-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-theme-text">Request Access</h1>
+      <p class="mt-2 text-theme-secondary">Join your family on Family Hub</p>
+    </div>
+
+    <%# Request form card %>
+    <div class="card p-8">
+      <%= form_with model: @access_request, local: true, class: "space-y-5" do |f| %>
+        <%# Display errors %>
+        <% if @access_request.errors.any? %>
+          <div class="toast toast-danger mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <div class="text-sm">
+              <% @access_request.errors.full_messages.each do |message| %>
+                <p><%= message %></p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Name fields %>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= f.label :first_name, class: "form-label" %>
+            <%= f.text_field :first_name,
+                class: "input",
+                placeholder: "First name",
+                autocomplete: "given-name",
+                required: true %>
+          </div>
+          <div>
+            <%= f.label :last_name, class: "form-label" %>
+            <%= f.text_field :last_name,
+                class: "input",
+                placeholder: "Last name",
+                autocomplete: "family-name",
+                required: true %>
+          </div>
+        </div>
+
+        <%# Email field %>
+        <div>
+          <%= f.label :email, class: "form-label" %>
+          <%= f.email_field :email,
+              class: "input",
+              placeholder: "you@example.com",
+              autocomplete: "email",
+              required: true %>
+        </div>
+
+        <%# Date of birth %>
+        <div>
+          <%= f.label :date_of_birth, "Date of Birth", class: "form-label" %>
+          <%= f.date_field :date_of_birth,
+              class: "input",
+              required: true %>
+          <p class="form-hint">This helps your family verify your identity.</p>
+        </div>
+
+        <%# City %>
+        <div>
+          <%= f.label :city, class: "form-label" %>
+          <%= f.text_field :city,
+              class: "input",
+              placeholder: "City you live in",
+              autocomplete: "address-level2",
+              required: true %>
+        </div>
+
+        <%# Submit button %>
+        <div class="pt-2">
+          <%= f.submit "Submit Request", class: "btn btn-primary w-full" %>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Back to login link %>
+    <div class="mt-6 text-center">
+      <p class="text-theme-secondary text-sm">
+        Already have an account?
+        <%= link_to "Sign in", login_path, class: "text-theme-primary hover:underline font-medium" %>
+      </p>
+    </div>
+  </div>
+</div>

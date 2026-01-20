@@ -1,0 +1,92 @@
+<%
+  # Confirm Dialog Component
+  # A pre-styled confirmation modal with icon, message, and action buttons.
+  #
+  # Required: id, title, message, form_action
+  # Optional: icon ("warning"|"danger"|"info"), confirm_text, cancel_text,
+  #           confirm_style ("primary"|"danger"), form_method
+
+  icon ||= "warning"
+  confirm_text ||= "Confirm"
+  cancel_text ||= "Cancel"
+  confirm_style ||= "primary"
+  form_method ||= :post
+
+  icon_config = {
+    "warning" => {
+      bg: "bg-yellow-100 dark:bg-yellow-900/30",
+      color: "text-yellow-600 dark:text-yellow-400",
+      path: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    },
+    "danger" => {
+      bg: "bg-red-100 dark:bg-red-900/30",
+      color: "text-red-600 dark:text-red-400",
+      path: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    },
+    "info" => {
+      bg: "bg-blue-100 dark:bg-blue-900/30",
+      color: "text-blue-600 dark:text-blue-400",
+      path: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    }
+  }
+
+  confirm_button_class = confirm_style == "danger" ?
+    "btn bg-red-600 hover:bg-red-700 text-white" :
+    "btn btn-primary"
+%>
+
+<div id="<%= id %>"
+     data-controller="modal"
+     class="contents">
+
+  <div data-modal-target="container"
+       class="hidden fixed inset-0 z-50 overflow-y-auto">
+
+    <div data-modal-target="backdrop"
+         data-action="click->modal#close"
+         class="fixed inset-0 bg-black/50 transition-opacity duration-200 opacity-0">
+    </div>
+
+    <div class="flex min-h-full items-center justify-center p-4">
+
+      <div data-modal-target="dialog"
+           class="relative w-full max-w-md bg-theme-surface rounded-[15px] shadow-xl
+                  transform transition-all duration-200 opacity-0 scale-95"
+           role="alertdialog"
+           aria-modal="true"
+           aria-labelledby="<%= id %>-title"
+           aria-describedby="<%= id %>-description">
+
+        <div class="p-6">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full <%= icon_config[icon][:bg] %> mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 <%= icon_config[icon][:color] %>" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icon_config[icon][:path] %>" />
+            </svg>
+          </div>
+
+          <h3 id="<%= id %>-title" class="text-lg font-semibold text-theme-text text-center mb-2">
+            <%= title %>
+          </h3>
+
+          <p id="<%= id %>-description" class="text-sm text-theme-secondary text-center mb-6">
+            <%= message %>
+          </p>
+
+          <div class="flex gap-3">
+            <button type="button"
+                    data-action="click->modal#close"
+                    class="btn btn-secondary flex-1 justify-center">
+              <%= cancel_text %>
+            </button>
+
+            <%= form_with url: form_action, method: form_method, class: "contents", data: { turbo: false } do %>
+              <button type="submit" class="<%= confirm_button_class %> flex-1 justify-center">
+                <%= confirm_text %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

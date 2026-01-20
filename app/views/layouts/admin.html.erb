@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-controller="theme" data-theme-color-mode-value="<%= current_user&.color_mode || 'system' %>">
+  <head>
+    <title><%= content_for(:title) || "Admin - Family Hub" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="robots" content="noindex, nofollow">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <script>
+      (function() {
+        const colorMode = localStorage.getItem('colorMode') || 'system';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (colorMode === 'dark' || (colorMode === 'system' && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+        document.documentElement.classList.add('no-transition');
+        window.addEventListener('DOMContentLoaded', () => {
+          requestAnimationFrame(() => {
+            document.documentElement.classList.remove('no-transition');
+          });
+        });
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-theme-background antialiased">
+    <%# Admin sidebar navigation %>
+    <div class="flex min-h-screen">
+      <%# Sidebar %>
+      <aside class="w-64 bg-theme-surface-elevated border-r border-theme hidden lg:block">
+        <div class="flex flex-col h-full">
+          <%# Logo %>
+          <div class="p-4 border-b border-theme">
+            <%= link_to dashboard_path, class: "flex items-center gap-2 text-theme-primary font-bold text-lg" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25" />
+              </svg>
+              <span>Family Hub</span>
+            <% end %>
+            <p class="text-xs text-theme-secondary mt-1">Admin Panel</p>
+          </div>
+
+          <%# Navigation %>
+          <nav class="flex-1 p-4 space-y-1">
+            <%= link_to admin_dashboard_path, class: "nav-link #{controller_name == 'dashboard' ? 'nav-link-active' : ''}" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+              </svg>
+              <span>Dashboard</span>
+            <% end %>
+
+            <%= link_to admin_access_requests_path, class: "nav-link #{controller_name == 'access_requests' ? 'nav-link-active' : ''}" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+              </svg>
+              <span>Access Requests</span>
+              <% pending_count = AccessRequest.pending.count rescue 0 %>
+              <% if pending_count > 0 %>
+                <span class="unread-badge"><%= pending_count %></span>
+              <% end %>
+            <% end %>
+
+            <%= link_to admin_users_path, class: "nav-link #{controller_name == 'users' ? 'nav-link-active' : ''}" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+              </svg>
+              <span>Users</span>
+            <% end %>
+
+            <%= link_to admin_themes_path, class: "nav-link #{controller_name == 'themes' ? 'nav-link-active' : ''}" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd" />
+              </svg>
+              <span>Themes</span>
+            <% end %>
+
+            <%= link_to admin_analytics_path, class: "nav-link #{controller_name == 'analytics' ? 'nav-link-active' : ''}" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+              </svg>
+              <span>Analytics</span>
+            <% end %>
+          </nav>
+
+          <%# Back to app %>
+          <div class="p-4 border-t border-theme">
+            <%= link_to dashboard_path, class: "nav-link" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+              </svg>
+              <span>Back to App</span>
+            <% end %>
+          </div>
+        </div>
+      </aside>
+
+      <%# Main content %>
+      <div class="flex-1 flex flex-col">
+        <%# Top bar %>
+        <header class="bg-theme-surface-elevated border-b border-theme px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <%# Mobile menu button %>
+            <button type="button" class="lg:hidden btn-ghost p-2 rounded-button">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-theme-text"><%= yield :page_title %></h1>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <%# Theme toggle %>
+            <button type="button" class="btn-ghost p-2 rounded-button" data-action="click->theme#toggle" title="Toggle dark mode">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              </svg>
+            </button>
+
+            <%# User info %>
+            <div class="flex items-center gap-2">
+              <div class="avatar avatar-sm">
+                <% if current_user.avatar.attached? %>
+                  <%= image_tag current_user.avatar, alt: current_user.full_name %>
+                <% else %>
+                  <%= current_user.initials %>
+                <% end %>
+              </div>
+              <span class="text-sm font-medium text-theme-text hidden sm:block"><%= current_user.first_name %></span>
+            </div>
+          </div>
+        </header>
+
+        <%# Flash messages %>
+        <%= render "shared/flash_messages" %>
+
+        <%# Page content %>
+        <main class="flex-1 p-6">
+          <%= yield %>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

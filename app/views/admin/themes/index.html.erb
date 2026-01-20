@@ -1,0 +1,20 @@
+<% content_for(:title) { "Themes - Admin - Family Hub" } %>
+<% content_for(:page_title) { "Themes" } %>
+
+<div class="flex items-center justify-between mb-6">
+  <p class="text-theme-secondary">Manage theme presets for your family.</p>
+  <%= link_to new_admin_theme_path, class: "btn btn-primary" do %>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+    </svg>
+    New Theme
+  <% end %>
+</div>
+
+<div class="card p-8 text-center text-theme-secondary">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+  </svg>
+  <h3 class="text-lg font-medium text-theme-text mb-2">Theme management coming soon</h3>
+  <p class="text-sm">Create custom color themes for your family hub.</p>
+</div>

@@ -1,0 +1,6 @@
+<%# Turbo Stream response for toggling a reaction %>
+
+<%# Update the reactions bar for this message %>
+<%= turbo_stream.replace "message_#{@message.id}_reactions" do %>
+  <%= render 'messages/reactions_bar', message: @message.reload, current_user: current_user %>
+<% end %>

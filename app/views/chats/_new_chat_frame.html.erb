@@ -1,0 +1,89 @@
+<%# New chat frame - displayed in the right panel when creating a new chat %>
+<%# locals: users, current_user %>
+
+<%= turbo_frame_tag "chat_conversation", class: "flex-1 flex flex-col h-full" do %>
+  <div class="flex-1 overflow-y-auto">
+    <div class="max-w-xl mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold text-theme-text mb-6">Start a New Chat</h1>
+
+      <!-- Direct Message Section -->
+      <div class="card p-6 mb-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Direct Message</h2>
+        <p class="text-theme-secondary text-sm mb-4">Start a private conversation with a family member</p>
+
+        <% if users.any? %>
+          <div class="space-y-2">
+            <% users.each do |user| %>
+              <%= form_with url: chats_path, method: :post, class: "group", data: { turbo_frame: "_top" } do |f| %>
+                <%= f.hidden_field :chat_type, value: 'direct' %>
+                <%= f.hidden_field :user_id, value: user.id %>
+                <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-[15px] hover:bg-theme-background transition-colors text-left">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag user.avatar, class: "w-10 h-10 rounded-full object-cover" %>
+                  <% else %>
+                    <div class="w-10 h-10 rounded-full bg-theme-primary/20 flex items-center justify-center">
+                      <span class="text-theme-primary font-medium"><%= user.initials %></span>
+                    </div>
+                  <% end %>
+                  <div class="flex-1">
+                    <p class="font-medium text-theme-text"><%= user.full_name %></p>
+                    <p class="text-sm text-theme-secondary"><%= user.city %></p>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-secondary group-hover:text-theme-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-theme-secondary text-center py-4">No other family members yet.</p>
+        <% end %>
+      </div>
+
+      <!-- Group Chat Section -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Create Group Chat</h2>
+        <p class="text-theme-secondary text-sm mb-4">Start a conversation with multiple family members</p>
+
+        <%= form_with url: chats_path, method: :post, data: { controller: "group-chat-form", turbo_frame: "_top" } do |f| %>
+          <%= f.hidden_field :chat_type, value: 'group' %>
+
+          <div class="space-y-4">
+            <div>
+              <%= f.label :name, "Group Name", class: "label" %>
+              <%= f.text_field :name, class: "input", placeholder: "e.g., Family Planning", required: true, name: "chat[name]" %>
+            </div>
+
+            <div>
+              <label class="label">Select Members</label>
+              <% if users.any? %>
+                <div class="space-y-2 max-h-48 overflow-y-auto">
+                  <% users.each do |user| %>
+                    <label class="flex items-center gap-3 p-3 rounded-[15px] hover:bg-theme-background transition-colors cursor-pointer">
+                      <input type="checkbox" name="member_ids[]" value="<%= user.id %>" class="rounded border-theme-border text-theme-primary focus:ring-theme-primary">
+                      <% if user.avatar.attached? %>
+                        <%= image_tag user.avatar, class: "w-8 h-8 rounded-full object-cover" %>
+                      <% else %>
+                        <div class="w-8 h-8 rounded-full bg-theme-primary/20 flex items-center justify-center">
+                          <span class="text-theme-primary text-sm font-medium"><%= user.initials %></span>
+                        </div>
+                      <% end %>
+                      <span class="text-theme-text"><%= user.full_name %></span>
+                    </label>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-theme-secondary text-center py-4">No other family members yet.</p>
+              <% end %>
+            </div>
+
+            <div class="pt-4">
+              <%= f.submit "Create Group Chat", class: "btn btn-primary w-full" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

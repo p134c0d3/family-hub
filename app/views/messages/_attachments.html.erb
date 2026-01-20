@@ -1,0 +1,86 @@
+<%# Attachments partial - displays message attachments %>
+<%# Separate images, videos, and documents for different layouts %>
+
+<% images = message.attachments.select { |a| Message.image?(a) } %>
+<% videos = message.attachments.select { |a| Message.video?(a) } %>
+<% documents = message.attachments.select { |a| Message.document?(a) } %>
+
+<%# Image grid with smart layout %>
+<% if images.any? %>
+  <div data-controller="smart-grid"
+       data-smart-grid-count-value="<%= images.count %>"
+       class="max-w-md">
+    <%# Container for images - layout determined by smart-grid controller %>
+    <div data-smart-grid-target="container"
+         class="<%= images.count == 1 ? '' : 'grid gap-1' %> <%= images.count == 2 ? 'grid-cols-2' : '' %> <%= images.count >= 3 ? 'grid-cols-2' : '' %>">
+      <% images.each_with_index do |attachment, index| %>
+        <button type="button"
+                data-action="click->lightbox#open"
+                data-lightbox-url="<%= rails_blob_path(attachment, disposition: 'inline') %>"
+                data-lightbox-caption="<%= attachment.filename %>"
+                data-lightbox-sender="<%= message.user.first_name %>"
+                data-smart-grid-target="item"
+                data-index="<%= index %>"
+                class="block rounded-lg overflow-hidden border border-theme-border hover:border-theme-primary transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-theme-primary">
+          <%= image_tag rails_blob_path(attachment),
+              class: "w-full h-full object-cover",
+              loading: "lazy",
+              alt: attachment.filename,
+              data: { smart_grid_target: "image", action: "load->smart-grid#imageLoaded" } %>
+        </button>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%# Videos %>
+<% if videos.any? %>
+  <div class="<%= images.any? ? 'mt-2' : '' %> space-y-2 max-w-md">
+    <% videos.each do |attachment| %>
+      <div class="rounded-lg overflow-hidden border border-theme-border">
+        <video controls
+               preload="metadata"
+               class="w-full max-h-64"
+               poster="">
+          <source src="<%= rails_blob_path(attachment) %>" type="<%= attachment.content_type %>">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<%# Documents %>
+<% if documents.any? %>
+  <div class="<%= (images.any? || videos.any?) ? 'mt-2' : '' %> space-y-1">
+    <% documents.each do |attachment| %>
+      <%= link_to rails_blob_path(attachment, disposition: 'attachment'),
+          class: "flex items-center gap-2 p-2 rounded-lg border border-theme-border hover:border-theme-primary hover:bg-theme-surface/50 transition-colors max-w-xs",
+          data: { turbo: false } do %>
+        <%# Document icon %>
+        <div class="flex-shrink-0">
+          <% if attachment.content_type == 'application/pdf' %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          <% else %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-theme-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          <% end %>
+        </div>
+
+        <%# File info %>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-theme-text truncate"><%= attachment.filename %></p>
+          <p class="text-xs text-theme-secondary"><%= Message.human_file_size(attachment.byte_size) %></p>
+        </div>
+
+        <%# Download icon %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-theme-secondary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

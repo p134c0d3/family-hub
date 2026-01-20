@@ -1,0 +1,60 @@
+<%# Message form partial for creating new messages %>
+<div data-controller="attachment">
+  <%= form_with model: [chat, message],
+      id: "message_form",
+      class: "flex flex-col gap-2",
+      data: { action: "submit->chat#submitMessage turbo:submit-end->chat#clearInput turbo:submit-end->attachment#clear" } do |f| %>
+
+    <%# Hidden field for reply parent %>
+    <%= f.hidden_field :parent_message_id, data: { chat_target: "parentMessageId" } %>
+
+    <%# Hidden file input %>
+    <%= f.file_field :attachments,
+        multiple: true,
+        class: "hidden",
+        accept: "image/*,video/*,.pdf,.doc,.docx,.txt",
+        data: {
+          attachment_target: "input",
+          action: "change->attachment#filesSelected"
+        } %>
+
+    <%# Attachment preview area %>
+    <div class="hidden px-1" data-attachment-target="preview"></div>
+
+    <%# Input row %>
+    <div class="flex items-end gap-2">
+      <%# Attachment button %>
+      <button type="button"
+              class="p-2 text-theme-secondary hover:text-theme-text hover:bg-theme-surface rounded-lg transition-colors flex-shrink-0 relative"
+              data-action="click->attachment#selectFiles"
+              data-attachment-target="button"
+              title="Attach files">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+        </svg>
+        <%# File count badge %>
+        <span class="hidden absolute -top-1 -right-1 w-4 h-4 bg-theme-primary text-white text-[10px] rounded-full flex items-center justify-center"
+              data-attachment-target="count"></span>
+      </button>
+
+      <%# Message input %>
+      <div class="flex-1">
+        <%= f.text_area :content,
+            class: "input resize-none min-h-[44px] max-h-32",
+            placeholder: "Type a message...",
+            rows: 1,
+            data: {
+              chat_target: "messageInput",
+              action: "input->chat#inputChanged keydown.enter->chat#handleEnter"
+            } %>
+      </div>
+
+      <%# Send button %>
+      <button type="submit" class="btn btn-primary flex-shrink-0" data-chat-target="sendButton">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+        </svg>
+      </button>
+    </div>
+  <% end %>
+</div>

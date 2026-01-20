@@ -1,0 +1,75 @@
+<% content_for(:title) { "Users - Admin - Family Hub" } %>
+<% content_for(:page_title) { "Users" } %>
+
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-theme">
+          <th class="text-left text-xs font-medium text-theme-secondary uppercase tracking-wider p-4">User</th>
+          <th class="text-left text-xs font-medium text-theme-secondary uppercase tracking-wider p-4">Role</th>
+          <th class="text-left text-xs font-medium text-theme-secondary uppercase tracking-wider p-4">Status</th>
+          <th class="text-left text-xs font-medium text-theme-secondary uppercase tracking-wider p-4">Joined</th>
+          <th class="text-right text-xs font-medium text-theme-secondary uppercase tracking-wider p-4">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-theme">
+        <% @users.each do |user| %>
+          <tr>
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div class="avatar avatar-sm">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag user.avatar, alt: user.full_name %>
+                  <% else %>
+                    <%= user.initials %>
+                  <% end %>
+                </div>
+                <div>
+                  <p class="font-medium text-theme-text"><%= user.full_name %></p>
+                  <p class="text-sm text-theme-secondary"><%= user.email %></p>
+                </div>
+              </div>
+            </td>
+            <td class="p-4">
+              <span class="badge <%= user.admin? ? 'badge-primary' : 'badge-secondary' %>">
+                <%= user.role.capitalize %>
+              </span>
+            </td>
+            <td class="p-4">
+              <span class="badge <%= user.active? ? 'badge-success' : 'badge-danger' %>">
+                <%= user.status.capitalize %>
+              </span>
+            </td>
+            <td class="p-4 text-sm text-theme-secondary">
+              <%= user.created_at.strftime("%b %d, %Y") %>
+            </td>
+            <td class="p-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <%= link_to admin_user_path(user), class: "btn btn-ghost btn-sm" do %>
+                  View
+                <% end %>
+                <% if user != current_user %>
+                  <% if user.active? %>
+                    <%= button_to deactivate_admin_user_path(user),
+                        method: :post,
+                        class: "btn btn-ghost btn-sm text-warning-600",
+                        data: { turbo_confirm: "Deactivate #{user.first_name}?" } do %>
+                      Deactivate
+                    <% end %>
+                  <% else %>
+                    <%= button_to activate_admin_user_path(user),
+                        method: :post,
+                        class: "btn btn-ghost btn-sm text-success-600" do %>
+                      Activate
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

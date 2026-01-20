@@ -1,0 +1,115 @@
+<% content_for(:title) { "Chats - Family Hub" } %>
+
+<%# Two-column Signal-style layout %>
+<div class="h-[calc(100vh-4rem)] flex"
+     data-controller="chat-list"
+     data-chat-list-current-user-id-value="<%= current_user.id %>">
+
+  <%# Left sidebar - Chat list %>
+  <div class="w-80 flex-shrink-0 border-r border-theme-border bg-theme-background hidden md:flex flex-col">
+    <%= render 'chats/chat_sidebar',
+        chats: @chats,
+        current_user: current_user,
+        active_chat_id: @active_chat&.id %>
+  </div>
+
+  <%# Right panel - Conversation area %>
+  <div class="flex-1 flex flex-col bg-theme-background">
+    <%= render 'chats/conversation_frame',
+        chat: @active_chat,
+        messages: @messages,
+        current_user: current_user %>
+  </div>
+</div>
+
+<%# Mobile: Show list view (will navigate to show page on click) %>
+<div class="md:hidden"
+     data-controller="chat-list"
+     data-chat-list-current-user-id-value="<%= current_user.id %>">
+  <div class="px-4 py-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-bold text-theme-text">Chats</h1>
+      <%= link_to new_chat_path, class: "btn btn-primary btn-sm" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        New
+      <% end %>
+    </div>
+
+    <% if @chats.any? %>
+      <div class="space-y-2">
+        <% @chats.each do |chat| %>
+          <%= link_to chat_path(chat), class: "card p-3 block hover:bg-theme-surface/80 transition-colors", data: { chat_list_target: "chatItem", chat_id: chat.id } do %>
+            <div class="flex items-center gap-3">
+              <%# Avatar %>
+              <div class="flex-shrink-0">
+                <% if chat.direct? %>
+                  <% other = chat.other_member(current_user) %>
+                  <% if other&.avatar&.attached? %>
+                    <%= image_tag other.avatar, class: "w-12 h-12 rounded-full object-cover" %>
+                  <% else %>
+                    <div class="w-12 h-12 rounded-full bg-theme-primary/20 flex items-center justify-center">
+                      <span class="text-theme-primary font-medium text-lg"><%= other&.initials || '?' %></span>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="w-12 h-12 rounded-[15px] bg-theme-primary/20 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-theme-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+
+              <%# Chat info %>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-medium text-theme-text truncate"><%= chat.display_name(current_user) %></h3>
+                  <% if chat.last_message %>
+                    <span class="text-xs text-theme-secondary"><%= time_ago_in_words(chat.last_message.created_at) %></span>
+                  <% end %>
+                </div>
+                <div data-chat-preview>
+                  <% if chat.last_message %>
+                    <p class="text-sm text-theme-secondary truncate">
+                      <% if chat.last_message.user == current_user %>
+                        <span class="text-theme-text">You:</span>
+                      <% else %>
+                        <span class="text-theme-text"><%= chat.last_message.user.first_name %>:</span>
+                      <% end %>
+                      <%= chat.last_message.display_content %>
+                    </p>
+                  <% else %>
+                    <p class="text-sm text-theme-secondary italic">No messages yet</p>
+                  <% end %>
+                </div>
+                <div data-chat-typing class="hidden">
+                  <p class="text-sm text-theme-primary flex items-center gap-1.5">
+                    <span class="typing-indicator"><span></span><span></span><span></span></span>
+                    <span class="typing-text"></span>
+                  </p>
+                </div>
+              </div>
+
+              <%# Unread badge %>
+              <% unread = chat.unread_count_for(current_user) %>
+              <% if unread > 0 %>
+                <div class="badge badge-primary"><%= unread > 99 ? '99+' : unread %></div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="card p-8 text-center text-theme-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <h3 class="text-lg font-medium text-theme-text mb-2">No conversations yet</h3>
+        <p class="mb-4">Start chatting with your family members!</p>
+        <%= link_to "Start a conversation", new_chat_path, class: "text-theme-primary hover:underline" %>
+      </div>
+    <% end %>
+  </div>
+</div>

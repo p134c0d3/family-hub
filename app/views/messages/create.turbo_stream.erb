@@ -1,0 +1,11 @@
+<%# Turbo Stream response for creating a message %>
+
+<%# Append the new message to the messages list %>
+<%= turbo_stream.append "messages" do %>
+  <%= render partial: 'messages/message', locals: { message: @message, current_user: current_user } %>
+<% end %>
+
+<%# Clear the message form %>
+<%= turbo_stream.replace "message_form" do %>
+  <%= render partial: 'chats/message_form', locals: { chat: @chat, message: Message.new } %>
+<% end %>

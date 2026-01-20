@@ -1,0 +1,73 @@
+<% content_for(:title) { "Request Submitted - Family Hub" } %>
+
+<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-theme-background">
+  <div class="w-full max-w-md text-center">
+    <%# Status icon %>
+    <div class="mb-6">
+      <% if @access_request.pending? %>
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-warning-50 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-theme-text">Request Pending</h1>
+        <p class="mt-2 text-theme-secondary">Your request is awaiting review.</p>
+      <% elsif @access_request.approved? %>
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-success-50 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-theme-text">Request Approved!</h1>
+        <p class="mt-2 text-theme-secondary">You should have received a temporary password via email.</p>
+      <% else %>
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-danger-50 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-theme-text">Request Denied</h1>
+        <p class="mt-2 text-theme-secondary">Your request was not approved.</p>
+      <% end %>
+    </div>
+
+    <%# Request details card %>
+    <div class="card p-6 text-left mb-6">
+      <h2 class="text-sm font-medium text-theme-secondary mb-4">Request Details</h2>
+
+      <div class="space-y-3">
+        <div>
+          <p class="text-xs text-theme-muted">Name</p>
+          <p class="text-theme-text"><%= @access_request.full_name %></p>
+        </div>
+        <div>
+          <p class="text-xs text-theme-muted">Email</p>
+          <p class="text-theme-text"><%= @access_request.email %></p>
+        </div>
+        <div>
+          <p class="text-xs text-theme-muted">Submitted</p>
+          <p class="text-theme-text"><%= @access_request.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        </div>
+        <% if @access_request.reviewed_at %>
+          <div>
+            <p class="text-xs text-theme-muted">Reviewed</p>
+            <p class="text-theme-text"><%= @access_request.reviewed_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Actions %>
+    <% if @access_request.pending? %>
+      <p class="text-sm text-theme-secondary mb-4">
+        A family admin will review your request and you'll receive an email when a decision is made.
+      </p>
+    <% elsif @access_request.approved? %>
+      <%= link_to "Sign in to Family Hub", login_path, class: "btn btn-primary" %>
+    <% end %>
+
+    <div class="mt-4">
+      <%= link_to "← Back to Login", login_path, class: "text-theme-secondary hover:text-theme-text text-sm" %>
+    </div>
+  </div>
+</div>
