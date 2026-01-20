@@ -33,11 +33,14 @@ class User < ApplicationRecord
   has_many :message_read_receipts, dependent: :destroy
   has_many :created_chats, class_name: 'Chat', foreign_key: :created_by_id, dependent: :nullify
 
+  # Notification associations
+  has_many :notifications, dependent: :destroy
+  has_many :triggered_notifications, class_name: 'Notification', foreign_key: :actor_id, dependent: :destroy
+
   # Future associations (defined when models are created)
   # has_many :events, foreign_key: :created_by_id, dependent: :nullify
   # has_many :event_rsvps, dependent: :destroy
   # has_many :media_items, foreign_key: :uploaded_by_id, dependent: :nullify
-  # has_many :mentions, dependent: :destroy
 
   # Validations
   validates :email,
@@ -138,6 +141,25 @@ class User < ApplicationRecord
   # Demote admin to member
   def make_member!
     update(role: 'member')
+  end
+
+  # Check if user should receive in-app notifications
+  def should_receive_notification?(chat = nil)
+    return false unless active?
+    return false unless notify_in_app?
+
+    # If a chat is provided, check if notifications are enabled for that chat
+    if chat
+      membership = chat_memberships.find_by(chat: chat)
+      return false if membership && !membership.notifications_enabled?
+    end
+
+    true
+  end
+
+  # Get unread notification count
+  def unread_notifications_count
+    notifications.unread.count
   end
 
   # Generate a temporary password

@@ -37,16 +37,25 @@
               data-attachment-target="count"></span>
       </button>
 
-      <%# Message input %>
-      <div class="flex-1">
+      <%# Message input with mention autocomplete %>
+      <div class="flex-1 relative" data-controller="mention" data-mention-chat-id-value="<%= chat.id %>">
         <%= f.text_area :content,
             class: "input resize-none min-h-[44px] max-h-32",
-            placeholder: "Type a message...",
+            placeholder: "Type a message... (use @ to mention)",
             rows: 1,
             data: {
               chat_target: "messageInput",
+              mention_target: "input",
               action: "input->chat#inputChanged keydown.enter->chat#handleEnter"
             } %>
+
+        <%# Mention autocomplete dropdown %>
+        <div class="absolute left-0 right-0 bottom-full mb-1 bg-theme-surface-elevated rounded-lg shadow-lg border border-theme max-h-48 overflow-y-auto hidden z-50"
+             data-mention-target="dropdown">
+          <div data-mention-target="results">
+            <%# Results populated via JavaScript %>
+          </div>
+        </div>
       </div>
 
       <%# Send button %>

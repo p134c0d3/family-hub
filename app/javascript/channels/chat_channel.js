@@ -1,5 +1,5 @@
 // Chat channel subscription for real-time messaging
-import consumer from "./consumer"
+import consumer from "channels/consumer"
 
 // This will be initialized by the chat Stimulus controller
 // when a user views a chat conversation

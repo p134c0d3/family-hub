@@ -170,13 +170,26 @@ A Ruby on Rails 8 application for family members to communicate, share calendars
   - *Clickable to scroll to original message*
   - *Reply indicator while composing also shows content preview*
   - *Cancel reply button*
-- [ ] Thread notification logic
+- [x] Thread notification logic
+  - *NotificationService creates notifications when replying to someone's message*
+  - *Real-time delivery via NotificationChannel (ActionCable)*
+  - *Notification bell in navbar with unread count badge*
 
 #### 1.9 @Mentions
-- [ ] Mention parser service
-- [ ] @username autocomplete
-- [ ] Mention notifications
-- [ ] Highlight mentions in messages
+- [x] Mention parser service
+  - *MentionService parses @FirstName patterns from message content*
+  - *Stores mentioned_user_ids JSON array on messages*
+- [x] @username autocomplete
+  - *Stimulus mention_controller.js detects @ in input*
+  - *Fetches matching chat members via /chats/:id/mentions API*
+  - *Keyboard navigation (↑/↓/Enter/Escape)*
+- [x] Mention notifications
+  - *Creates Notification records for each mentioned user*
+  - *Broadcasts via NotificationChannel for real-time delivery*
+  - *Toast notification appears for new mentions*
+- [x] Highlight mentions in messages
+  - *render_message_content helper wraps @mentions in styled spans*
+  - *.mention CSS class with primary color and subtle background*
 
 #### 1.10 File Sharing in Chat
 - [x] Attachment upload via Active Storage
@@ -393,10 +406,11 @@ A Ruby on Rails 8 application for family members to communicate, share calendars
 ### Messaging Tables
 - `chats` - Conversations (direct, group, public)
 - `chat_memberships` - User participation in chats
-- `messages` - Encrypted message content
+- `messages` - Encrypted message content + `mentioned_user_ids` JSON
 - `message_reactions` - Emoji reactions on messages
 - `message_read_receipts` - Read status tracking
 - `message_attachments` - File attachments (via Active Storage)
+- `notifications` - Thread reply and @mention notifications (polymorphic)
 
 ### Calendar Tables (Sprint 2)
 - `events` - Calendar events with recurrence
@@ -695,4 +709,44 @@ family-hub/
 
 ---
 
-*Last updated: Sprint 1 - Messaging System (Signal-Style Chat Layout & Bug Fixes session)*
+### Session: @Mentions and Thread Notifications
+
+**Items Completed:**
+- Thread reply notifications (notify parent message author when someone replies)
+- @Mentions system with autocomplete, parsing, notifications, and highlighting
+- Notification bell in navbar with real-time badge updates
+- Toast notifications for new mentions/replies
+
+**Database Changes:**
+- Created `notifications` table (user_id, actor_id, notifiable polymorphic, notification_type, read_at)
+- Added `mentioned_user_ids` JSON column to messages
+
+**New Files Created:**
+- `app/models/notification.rb` - Notification model with scopes, helpers, ActionCable broadcasts
+- `app/services/mention_service.rb` - Parses @FirstName mentions, stores IDs, creates notifications
+- `app/services/notification_service.rb` - Creates thread reply notifications
+- `app/channels/notification_channel.rb` - Real-time notification delivery per user
+- `app/controllers/notifications_controller.rb` - List, mark read, mark all read endpoints
+- `app/controllers/mentions_controller.rb` - Autocomplete API for chat members
+- `app/javascript/controllers/mention_controller.js` - Stimulus controller for @mention autocomplete
+- `app/javascript/controllers/notification_controller.js` - Stimulus controller for notification bell/badge/toast
+- `app/views/shared/_notification_bell.html.erb` - Notification UI with dropdown and toast
+
+**Files Modified:**
+- `app/models/message.rb` - Added mention callbacks, `mentioned_users` method
+- `app/models/user.rb` - Added notification associations, `should_receive_notification?` helper
+- `app/helpers/application_helper.rb` - Added `render_message_content` helper for mention highlighting
+- `app/views/messages/_message.html.erb` - Uses helper to render content with highlighted mentions
+- `app/views/chats/_message_form.html.erb` - Added mention controller and autocomplete dropdown
+- `app/views/shared/_navbar.html.erb` - Added notification bell
+- `app/assets/tailwind/application.css` - Added `.mention` class styling
+- `config/routes.rb` - Added notification and mention routes
+- `config/application.rb` - Added app/services to autoload paths
+
+**Bug Fixes:**
+- Fixed Turbo Frame error when clicking chat settings gear (added `data-turbo-frame="_top"`)
+- Fixed `channels/consumer` import path in `chat_channel.js` (relative → importmap path)
+
+---
+
+*Last updated: Sprint 1 - Messaging System (@Mentions and Thread Notifications session)*

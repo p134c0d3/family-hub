@@ -35,11 +35,18 @@ Rails.application.routes.draw do
   # Settings
   resource :settings, only: [:show, :update]
 
+  # Notifications
+  resources :notifications, only: [:index] do
+    patch :mark_read, on: :member
+    post :mark_all_read, on: :collection
+  end
+
   # Chats and messages
   resources :chats do
     resources :messages, only: [:create, :update, :destroy] do
       resources :reactions, only: [:create, :destroy], controller: "message_reactions"
     end
+    resources :mentions, only: [:index]  # Autocomplete API for @mentions
     member do
       post :add_member
       delete :remove_member

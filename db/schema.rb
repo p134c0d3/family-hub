@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_19_225119) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
   create_table "access_requests", force: :cascade do |t|
     t.string "city", null: false
     t.datetime "created_at", null: false
@@ -105,6 +105,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_225119) do
     t.boolean "edited", default: false, null: false
     t.text "encrypted_content", null: false
     t.string "encryption_iv"
+    t.json "mentioned_user_ids", default: []
     t.integer "parent_message_id"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
@@ -113,6 +114,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_225119) do
     t.index ["deleted_at"], name: "index_messages_on_deleted_at"
     t.index ["parent_message_id"], name: "index_messages_on_parent_message_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.integer "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "notifiable_id", null: false
+    t.string "notifiable_type", null: false
+    t.string "notification_type", null: false
+    t.datetime "read_at"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "themes", force: :cascade do |t|
@@ -163,6 +180,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_225119) do
   add_foreign_key "messages", "chats"
   add_foreign_key "messages", "messages", column: "parent_message_id"
   add_foreign_key "messages", "users"
+  add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "themes", "users", column: "created_by_id"
   add_foreign_key "users", "themes", column: "selected_theme_id"
 end

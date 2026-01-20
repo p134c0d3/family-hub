@@ -34,6 +34,8 @@ class Message < ApplicationRecord
 
   # Callbacks
   after_create_commit :broadcast_message_created
+  after_create_commit :process_mentions
+  after_create_commit :create_thread_reply_notification
   after_update_commit :broadcast_message_updated
 
   # Scopes
@@ -130,6 +132,18 @@ class Message < ApplicationRecord
     User.where(id: read_receipts.pluck(:user_id))
   end
 
+  # Get users mentioned in this message
+  def mentioned_users
+    return User.none if mentioned_user_ids.blank?
+
+    User.where(id: mentioned_user_ids)
+  end
+
+  # Check if a user was mentioned in this message
+  def mentions?(user)
+    mentioned_user_ids&.include?(user.id)
+  end
+
   # Display content (handles deleted messages)
   def display_content
     deleted? ? '[Message deleted]' : content
@@ -204,5 +218,15 @@ class Message < ApplicationRecord
         locals: { message: self, current_user: member }
       )
     end
+  end
+
+  # Process @mentions in message content and create notifications
+  def process_mentions
+    MentionService.process(self)
+  end
+
+  # Create notification for parent message author when replying to a thread
+  def create_thread_reply_notification
+    NotificationService.create_thread_reply_notification(self)
   end
 end

@@ -45,8 +45,11 @@
         </div>
       </div>
 
-      <%# Right side: Theme toggle + User menu %>
+      <%# Right side: Notifications + Theme toggle + User menu %>
       <div class="flex items-center gap-4">
+        <%# Notification bell %>
+        <%= render "shared/notification_bell" %>
+
         <%# Theme toggle button %>
         <button
           type="button"
