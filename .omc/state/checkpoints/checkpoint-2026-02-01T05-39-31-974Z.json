@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-02-01T05:39:31.974Z",
+  "trigger": "manual",
+  "active_modes": {
+    "ultrawork": {
+      "original_prompt": "Okay, let's just go ahead and start on Sprint 2. Let's go ahead and use /oh-my-claudecode:plan to research and investigate the codebase thoroughly, then create a plan (use max parallel agents to /oh-my-claudecode:research and plan). Let's also make sure we are following Ruby, Rails, and Hotwire best practices, you can use web search and context7 mcp to find and adhere to best practices. I want to make sure we are extremely thorough. Once we have a very detailed plan in place, I want to review the plan, and then once I approve it, you can use /oh-my-claudecode:ultrawork (with up to 10 parallel agents), to work through the plan thoroughly, correctly, with immense thinking. If you aren't 100% certain of something, I want you to ask me questions. Keep asking me questions until you are 100% certain of the answer you need to proceed. I want ZERO assumptions."
+    }
+  },
+  "todo_summary": {
+    "pending": 0,
+    "in_progress": 0,
+    "completed": 0
+  },
+  "wisdom_exported": false
+}
