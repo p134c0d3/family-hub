@@ -33,21 +33,50 @@
 
       <%# Profile details %>
       <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <% if @user.phone.present? %>
+          <div>
+            <p class="text-sm text-theme-secondary">Phone</p>
+            <p class="text-theme-text"><%= @user.phone %></p>
+          </div>
+        <% end %>
+
+        <% if @user.address.present? %>
+          <div>
+            <p class="text-sm text-theme-secondary">Address</p>
+            <p class="text-theme-text"><%= @user.address %></p>
+          </div>
+        <% end %>
+
+        <% if @user.birthday.present? %>
+          <div>
+            <p class="text-sm text-theme-secondary">Birthday</p>
+            <p class="text-theme-text"><%= @user.birthday.strftime("%B %d, %Y") %></p>
+          </div>
+        <% end %>
+
         <div>
           <p class="text-sm text-theme-secondary">Location</p>
           <p class="text-theme-text"><%= @user.city %></p>
         </div>
+
         <div>
-          <p class="text-sm text-theme-secondary">Birthday</p>
+          <p class="text-sm text-theme-secondary">Date of Birth</p>
           <p class="text-theme-text"><%= @user.date_of_birth.strftime("%B %d, %Y") %></p>
         </div>
+
         <div>
           <p class="text-sm text-theme-secondary">Member since</p>
           <p class="text-theme-text"><%= @user.created_at.strftime("%B %Y") %></p>
         </div>
+
         <div>
           <p class="text-sm text-theme-secondary">Role</p>
           <p class="text-theme-text"><%= @user.role.capitalize %></p>
+        </div>
+
+        <div>
+          <p class="text-sm text-theme-secondary">Theme</p>
+          <p class="text-theme-text"><%= @user.effective_theme.name %></p>
         </div>
       </div>
     </div>

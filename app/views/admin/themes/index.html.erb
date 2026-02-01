@@ -11,10 +11,79 @@
   <% end %>
 </div>
 
-<div class="card p-8 text-center text-theme-secondary">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-  </svg>
-  <h3 class="text-lg font-medium text-theme-text mb-2">Theme management coming soon</h3>
-  <p class="text-sm">Create custom color themes for your family hub.</p>
-</div>
+<% if @themes.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% @themes.each do |theme| %>
+      <div class="card p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-theme-text"><%= theme.name %></h3>
+            <% if theme.description.present? %>
+              <p class="text-sm text-theme-secondary mt-1"><%= theme.description %></p>
+            <% end %>
+          </div>
+          <% if theme.is_default %>
+            <span class="badge badge-primary text-xs">Default</span>
+          <% end %>
+        </div>
+
+        <!-- Color Swatches -->
+        <div class="grid grid-cols-6 gap-2 mb-4">
+          <% %w[primary secondary accent success warning error].each do |color_key| %>
+            <div class="group relative">
+              <div class="w-full aspect-square rounded-lg border border-theme-border"
+                   style="background-color: <%= theme.colors[color_key] || '#cccccc' %>"
+                   title="<%= color_key.titleize %>"></div>
+              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                <%= color_key.titleize %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex items-center gap-4 text-sm text-theme-secondary mb-4 pb-4 border-b border-theme-border">
+          <div class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span><%= theme.users.count %> users</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+            <span><%= theme.colors.keys.count %> colors</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2">
+          <%= link_to edit_admin_theme_path(theme), class: "btn btn-secondary btn-sm flex-1" do %>
+            Edit
+          <% end %>
+          <% unless theme.is_default %>
+            <%= button_to set_default_admin_theme_path(theme), method: :post, class: "btn btn-ghost btn-sm" do %>
+              Set Default
+            <% end %>
+          <% end %>
+          <% if theme.users.none? %>
+            <%= button_to admin_theme_path(theme), method: :delete, class: "btn btn-ghost btn-sm text-red-600", data: { turbo_confirm: "Delete #{theme.name}?" } do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="card p-8 text-center text-theme-secondary">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+    </svg>
+    <h3 class="text-lg font-medium text-theme-text mb-2">No themes yet</h3>
+    <p class="text-sm">Create your first custom color theme.</p>
+  </div>
+<% end %>

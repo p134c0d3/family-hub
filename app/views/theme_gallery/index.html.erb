@@ -1,0 +1,95 @@
+<% content_for(:title) { "Theme Gallery - Family Hub" } %>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-theme-text mb-2">Theme Gallery</h1>
+    <p class="text-theme-secondary">Browse and select from our collection of beautiful themes</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% @themes.each do |theme| %>
+      <div class="card p-6 hover:shadow-xl transition-shadow duration-200 <%= 'ring-2 ring-theme-primary' if theme.id == @current_theme&.id %>">
+        <%# Theme header %>
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-theme-text mb-1"><%= theme.name %></h3>
+            <% if theme.id == @current_theme&.id %>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-theme-primary/10 text-theme-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Active
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Theme description %>
+        <p class="text-sm text-theme-secondary mb-4"><%= theme.description %></p>
+
+        <%# Color swatches preview %>
+        <div class="mb-4">
+          <p class="text-xs font-medium text-theme-secondary mb-2">Color Palette</p>
+          <div class="flex flex-wrap gap-2">
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 rounded border border-gray-300" style="background-color: <%= theme.colors['primary'] %>"></div>
+              <span class="text-xs text-theme-secondary">Primary</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 rounded border border-gray-300" style="background-color: <%= theme.colors['secondary'] %>"></div>
+              <span class="text-xs text-theme-secondary">Secondary</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-6 h-6 rounded border border-gray-300" style="background-color: <%= theme.colors['accent'] %>"></div>
+              <span class="text-xs text-theme-secondary">Accent</span>
+            </div>
+          </div>
+        </div>
+
+        <%# Action buttons %>
+        <div class="flex gap-2 pt-4 border-t border-theme-border">
+          <%= link_to preview_theme_gallery_path(theme),
+              class: "btn btn-secondary flex-1",
+              data: { turbo_frame: "modal" } do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Preview
+          <% end %>
+
+          <% if theme.id == @current_theme&.id %>
+            <button class="btn bg-theme-primary/10 text-theme-primary cursor-default flex-1" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Selected
+            </button>
+          <% else %>
+            <%= button_to select_theme_gallery_path(theme),
+                method: :post,
+                class: "btn btn-primary flex-1" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Select
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Empty state %>
+  <% if @themes.empty? %>
+    <div class="card p-8 text-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-theme-secondary opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      </svg>
+      <h3 class="text-lg font-medium text-theme-text mb-2">No themes available</h3>
+      <p class="text-sm text-theme-secondary">Check back later for new themes.</p>
+    </div>
+  <% end %>
+</div>
+
+<%= turbo_frame_tag "modal" %>

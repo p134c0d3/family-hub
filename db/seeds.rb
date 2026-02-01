@@ -17,48 +17,38 @@ end
 if Rails.env.development? && Theme.count == 1
   puts "Creating sample themes for development..."
 
+  base_colors = Theme.default_colors
+
   themes = [
     {
       name: 'Forest Green',
-      colors: {
+      colors: base_colors.merge(
         'primary' => '#059669',
-        'secondary' => '#64748B',
-        'accent' => '#34D399',
-        'background_light' => '#FFFFFF',
-        'background_dark' => '#0F172A',
-        'surface_light' => '#F8FAFC',
-        'surface_dark' => '#1E293B',
-        'text_light' => '#1E293B',
-        'text_dark' => '#F8FAFC'
-      }
+        'secondary' => '#10b981',
+        'accent' => '#fbbf24',
+        'primary_dark' => '#34d399',
+        'secondary_dark' => '#6ee7b7'
+      )
     },
     {
       name: 'Sunset Orange',
-      colors: {
-        'primary' => '#EA580C',
-        'secondary' => '#64748B',
-        'accent' => '#FB923C',
-        'background_light' => '#FFFFFF',
-        'background_dark' => '#0F172A',
-        'surface_light' => '#FFF7ED',
-        'surface_dark' => '#1E293B',
-        'text_light' => '#1E293B',
-        'text_dark' => '#F8FAFC'
-      }
+      colors: base_colors.merge(
+        'primary' => '#f97316',
+        'secondary' => '#fb923c',
+        'accent' => '#fbbf24',
+        'primary_dark' => '#fdba74',
+        'secondary_dark' => '#fed7aa'
+      )
     },
     {
       name: 'Royal Purple',
-      colors: {
-        'primary' => '#7C3AED',
-        'secondary' => '#64748B',
-        'accent' => '#A78BFA',
-        'background_light' => '#FFFFFF',
-        'background_dark' => '#0F172A',
-        'surface_light' => '#FAF5FF',
-        'surface_dark' => '#1E293B',
-        'text_light' => '#1E293B',
-        'text_dark' => '#F8FAFC'
-      }
+      colors: base_colors.merge(
+        'primary' => '#7c3aed',
+        'secondary' => '#8b5cf6',
+        'accent' => '#a78bfa',
+        'primary_dark' => '#a78bfa',
+        'secondary_dark' => '#c4b5fd'
+      )
     }
   ]
 
@@ -87,5 +77,7 @@ if Rails.env.development? && User.count.zero?
 
   puts "  Created admin user: #{user.email} (password: password123)"
 end
+
+# Additional themes are created above in development mode
 
 puts "Seeding complete!"

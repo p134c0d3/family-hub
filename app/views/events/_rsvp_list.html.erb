@@ -1,0 +1,41 @@
+<%# List of RSVPs with status %>
+<% if event.event_rsvps.any? %>
+  <div class="space-y-3">
+    <% EventRsvp::STATUSES.each do |status| %>
+      <% rsvps = event.event_rsvps.where(status: status).includes(:user) %>
+      <% next if rsvps.empty? %>
+
+      <div>
+        <h3 class="text-sm font-medium text-theme-text mb-2 flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full
+                       <%= case status
+                           when 'yes' then 'bg-green-500/20 text-green-500'
+                           when 'no' then 'bg-red-500/20 text-red-500'
+                           when 'maybe' then 'bg-yellow-500/20 text-yellow-500'
+                           when 'tentative' then 'bg-blue-500/20 text-blue-500'
+                           end %> text-xs">
+            <%= rsvps.count %>
+          </span>
+          <%= status.titleize %>
+        </h3>
+
+        <div class="grid grid-cols-2 gap-2">
+          <% rsvps.each do |rsvp| %>
+            <div class="flex items-center gap-2 p-2 bg-theme-surface rounded-[15px]">
+              <% if rsvp.user.avatar.attached? %>
+                <%= image_tag rsvp.user.avatar, class: "w-6 h-6 rounded-full object-cover" %>
+              <% else %>
+                <div class="w-6 h-6 rounded-full bg-theme-primary/20 flex items-center justify-center">
+                  <span class="text-theme-primary text-xs font-medium"><%= rsvp.user.initials %></span>
+                </div>
+              <% end %>
+              <span class="text-sm text-theme-text truncate"><%= rsvp.user.first_name %> <%= rsvp.user.last_name %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-sm text-theme-secondary text-center py-4">No RSVPs yet</p>
+<% end %>

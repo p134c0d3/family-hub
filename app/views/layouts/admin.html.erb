@@ -13,7 +13,7 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
 
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
     <script>
@@ -33,7 +33,7 @@
     </script>
   </head>
 
-  <body class="min-h-screen bg-theme-background antialiased">
+  <body class="min-h-screen bg-theme-background antialiased" style="<%= current_user&.effective_theme&.to_css_variables %>">
     <%# Admin sidebar navigation %>
     <div class="flex min-h-screen">
       <%# Sidebar %>

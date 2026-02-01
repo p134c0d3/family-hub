@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_01_060326) do
   create_table "access_requests", force: :cascade do |t|
     t.string "city", null: false
     t.datetime "created_at", null: false
@@ -77,6 +77,51 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
     t.index ["created_by_id"], name: "index_chats_on_created_by_id"
   end
 
+  create_table "event_reminders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "event_id", null: false
+    t.integer "minutes_before", null: false
+    t.datetime "remind_at", null: false
+    t.boolean "sent", default: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["event_id", "user_id", "minutes_before"], name: "idx_reminders_unique", unique: true
+    t.index ["event_id"], name: "index_event_reminders_on_event_id"
+    t.index ["remind_at"], name: "index_event_reminders_on_remind_at"
+    t.index ["user_id"], name: "index_event_reminders_on_user_id"
+  end
+
+  create_table "event_rsvps", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "event_id", null: false
+    t.text "note"
+    t.string "status", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["event_id", "user_id"], name: "index_event_rsvps_on_event_id_and_user_id", unique: true
+    t.index ["event_id"], name: "index_event_rsvps_on_event_id"
+    t.index ["user_id"], name: "index_event_rsvps_on_user_id"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.boolean "all_day", default: false
+    t.string "color", default: "#3b82f6"
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.text "description"
+    t.datetime "end_at"
+    t.datetime "recurrence_end_at"
+    t.text "recurrence_rule"
+    t.datetime "start_at", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "visibility", default: "public"
+    t.index ["created_by_id"], name: "index_events_on_created_by_id"
+    t.index ["start_at", "end_at"], name: "index_events_on_start_at_and_end_at"
+    t.index ["start_at"], name: "index_events_on_start_at"
+    t.index ["visibility"], name: "index_events_on_visibility"
+  end
+
   create_table "message_reactions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "emoji", null: false
@@ -136,6 +181,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
     t.json "colors", null: false
     t.datetime "created_at", null: false
     t.integer "created_by_id"
+    t.text "description"
+    t.boolean "is_active"
     t.boolean "is_default", default: false, null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
@@ -145,6 +192,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
   end
 
   create_table "users", force: :cascade do |t|
+    t.text "address"
+    t.text "bio"
+    t.date "birthday"
     t.string "city", null: false
     t.string "color_mode", default: "system", null: false
     t.datetime "created_at", null: false
@@ -153,18 +203,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
     t.string "encryption_key_salt"
     t.string "first_name", null: false
     t.string "last_name", null: false
+    t.json "notification_preferences", default: {}
     t.boolean "notify_email", default: true, null: false
     t.boolean "notify_in_app", default: true, null: false
     t.boolean "notify_push", default: false, null: false
     t.boolean "password_changed", default: false, null: false
     t.string "password_digest", null: false
+    t.string "phone"
     t.string "role", default: "member", null: false
     t.bigint "selected_theme_id"
     t.string "status", default: "active", null: false
+    t.integer "theme_id"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["role"], name: "index_users_on_role"
     t.index ["status"], name: "index_users_on_status"
+    t.index ["theme_id"], name: "index_users_on_theme_id"
   end
 
   add_foreign_key "access_requests", "users", column: "reviewed_by_id"
@@ -173,6 +227,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
   add_foreign_key "chat_memberships", "chats"
   add_foreign_key "chat_memberships", "users"
   add_foreign_key "chats", "users", column: "created_by_id"
+  add_foreign_key "event_reminders", "events"
+  add_foreign_key "event_reminders", "users"
+  add_foreign_key "event_rsvps", "events"
+  add_foreign_key "event_rsvps", "users"
+  add_foreign_key "events", "users", column: "created_by_id"
   add_foreign_key "message_reactions", "messages"
   add_foreign_key "message_reactions", "users"
   add_foreign_key "message_read_receipts", "messages"
@@ -183,5 +242,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_20_124615) do
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "themes", "users", column: "created_by_id"
+  add_foreign_key "users", "themes"
   add_foreign_key "users", "themes", column: "selected_theme_id"
 end

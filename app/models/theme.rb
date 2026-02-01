@@ -21,7 +21,7 @@
 class Theme < ApplicationRecord
   # Associations
   belongs_to :created_by, class_name: 'User', optional: true
-  has_many :users, foreign_key: :selected_theme_id, dependent: :nullify
+  has_many :users, dependent: :nullify
 
   # Validations
   validates :name, presence: true, uniqueness: true, length: { maximum: 50 }
@@ -32,19 +32,29 @@ class Theme < ApplicationRecord
   before_save :ensure_single_default, if: :is_default?
 
   # Scopes
+  scope :active, -> { where(is_active: true) }
   scope :default_theme, -> { find_by(is_default: true) }
   scope :ordered, -> { order(:name) }
 
-  # Color keys required in the colors JSON
-  REQUIRED_COLOR_KEYS = %w[
+  # Full design system colors (15+ keys)
+  REQUIRED_COLORS = %w[
     primary
     secondary
     accent
-    background_light
+    background
+    surface
+    text
+    success
+    warning
+    error
+    info
+    border
+    shadow
+    primary_dark
+    secondary_dark
+    accent_dark
     background_dark
-    surface_light
     surface_dark
-    text_light
     text_dark
   ].freeze
 
@@ -62,20 +72,18 @@ class Theme < ApplicationRecord
   end
 
   # Generate CSS custom properties for this theme
-  def to_css_variables(mode = :light)
+  def to_css_variables(dark_mode: false)
     return '' if colors.blank?
 
-    suffix = mode == :dark ? '_dark' : '_light'
-
     vars = []
-    vars << "--theme-primary: #{color('primary')};"
-    vars << "--theme-secondary: #{color('secondary')};"
-    vars << "--theme-accent: #{color('accent')};"
-    vars << "--theme-background: #{color("background#{suffix}")};"
-    vars << "--theme-surface: #{color("surface#{suffix}")};"
-    vars << "--theme-text: #{color("text#{suffix}")};"
-
-    vars.join("\n")
+    colors.each do |key, value|
+      if dark_mode && colors["#{key}_dark"].present?
+        vars << "--color-#{key.dasherize}: #{colors["#{key}_dark"]};"
+      elsif !key.end_with?('_dark')
+        vars << "--color-#{key.dasherize}: #{value};"
+      end
+    end
+    vars.compact.join("\n")
   end
 
   # Class methods
@@ -85,28 +93,42 @@ class Theme < ApplicationRecord
     default_theme || create_default_theme
   end
 
+  # Get default color palette
+  def self.default_colors
+    {
+      'primary' => '#3b82f6',
+      'secondary' => '#8b5cf6',
+      'accent' => '#f59e0b',
+      'background' => '#ffffff',
+      'surface' => '#f8fafc',
+      'text' => '#1f2937',
+      'success' => '#10b981',
+      'warning' => '#f59e0b',
+      'error' => '#ef4444',
+      'info' => '#3b82f6',
+      'border' => '#e2e8f0',
+      'shadow' => 'rgba(0,0,0,0.1)',
+      'primary_dark' => '#60a5fa',
+      'secondary_dark' => '#a78bfa',
+      'accent_dark' => '#fbbf24',
+      'background_dark' => '#111827',
+      'surface_dark' => '#1f2937',
+      'text_dark' => '#f9fafb'
+    }
+  end
+
   # Create the default "Ocean Blue" theme
   def self.create_default_theme
     create!(
       name: 'Ocean Blue',
       is_default: true,
-      colors: {
-        'primary' => '#3B82F6',
-        'secondary' => '#64748B',
-        'accent' => '#0EA5E9',
-        'background_light' => '#FFFFFF',
-        'background_dark' => '#0F172A',
-        'surface_light' => '#F8FAFC',
-        'surface_dark' => '#1E293B',
-        'text_light' => '#1E293B',
-        'text_dark' => '#F8FAFC'
-      }
+      colors: default_colors
     )
   end
 
   private
 
-  # Validate that colors contains all required keys with valid hex values
+  # Validate that colors contains all required keys
   def validate_colors_structure
     return if colors.blank?
 
@@ -115,21 +137,24 @@ class Theme < ApplicationRecord
       return
     end
 
-    missing_keys = REQUIRED_COLOR_KEYS - colors.keys
+    # Only check non-dark variants
+    missing_keys = REQUIRED_COLORS.reject { |k| k.end_with?('_dark') } - colors.keys
     if missing_keys.any?
       errors.add(:colors, "missing required keys: #{missing_keys.join(', ')}")
     end
 
-    # Validate hex color format
+    # Validate color formats (hex or rgba)
     colors.each do |key, value|
+      next if value.to_s.start_with?('rgba(') || value.to_s.start_with?('rgb(')
       unless value.to_s.match?(/\A#[0-9A-Fa-f]{6}\z/)
-        errors.add(:colors, "#{key} must be a valid hex color (e.g., #3B82F6)")
+        errors.add(:colors, "#{key} must be a valid hex color or rgb/rgba value")
       end
     end
   end
 
   # Ensure only one theme is marked as default
   def ensure_single_default
+    return unless is_default_changed? && is_default?
     Theme.where.not(id: id).update_all(is_default: false)
   end
 end

@@ -1,0 +1,37 @@
+<%# Recurrence options (daily/weekly/monthly) %>
+<div class="space-y-3">
+  <div class="form-group">
+    <label class="form-label text-sm">Repeat frequency</label>
+    <select name="recurrence_frequency" class="input" data-event-form-target="recurrenceFrequency">
+      <option value="daily">Daily</option>
+      <option value="weekly" selected>Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label text-sm">Repeat every</label>
+    <div class="flex items-center gap-2">
+      <input type="number" name="recurrence_interval" value="1" min="1" max="30" class="input w-20">
+      <span class="text-sm text-theme-text" data-event-form-target="intervalLabel">week(s)</span>
+    </div>
+  </div>
+
+  <div class="form-group" data-event-form-target="weekdaySelector">
+    <label class="form-label text-sm">Repeat on</label>
+    <div class="flex flex-wrap gap-2">
+      <% %w[Sunday Monday Tuesday Wednesday Thursday Friday Saturday].each_with_index do |day, index| %>
+        <label class="flex items-center gap-1 cursor-pointer">
+          <%= check_box_tag "recurrence_weekdays[]", index, false, class: "checkbox text-xs" %>
+          <span class="text-xs"><%= day[0..2] %></span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :recurrence_end_at, "End date (optional)", class: "form-label text-sm" %>
+    <%= f.date_field :recurrence_end_at, class: "input" %>
+    <p class="text-xs text-theme-secondary mt-1">Leave blank to repeat indefinitely</p>
+  </div>
+</div>

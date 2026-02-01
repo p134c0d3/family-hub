@@ -1,0 +1,48 @@
+<div class="bg-theme-background rounded-card border border-theme-border overflow-hidden">
+  <!-- Time slots -->
+  <div class="divide-y divide-theme-border">
+    <% (0..23).each do |hour| %>
+      <% hour_start = date.beginning_of_day + hour.hours %>
+      <% hour_end = hour_start + 1.hour %>
+      <% hour_events = events.select { |e| e.start_at >= hour_start && e.start_at < hour_end } %>
+
+      <div class="flex min-h-16 hover:bg-theme-surface/30 transition-colors cursor-pointer"
+           data-action="click->calendar#openEventModal"
+           data-start-at="<%= hour_start.iso8601 %>">
+        <!-- Time label -->
+        <div class="w-20 flex-shrink-0 p-2 text-right border-r border-theme-border">
+          <span class="text-sm text-theme-secondary font-medium">
+            <%= hour_start.strftime('%I %p') %>
+          </span>
+        </div>
+
+        <!-- Events column -->
+        <div class="flex-1 p-2 space-y-1">
+          <% hour_events.each do |event| %>
+            <%= link_to event_path(event), class: "block" do %>
+              <div class="p-2 rounded-button border-l-4 hover:shadow-theme-sm transition-shadow"
+                   style="background-color: <%= event.color %>15; border-left-color: <%= event.color %>;">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-theme-text text-sm truncate"><%= event.title %></p>
+                    <p class="text-xs text-theme-secondary">
+                      <%= event.start_at.strftime('%I:%M %p') %>
+                      <% if event.end_at %>
+                        - <%= event.end_at.strftime('%I:%M %p') %>
+                      <% end %>
+                    </p>
+                  </div>
+                  <% if event.recurring? %>
+                    <svg class="w-4 h-4 text-theme-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

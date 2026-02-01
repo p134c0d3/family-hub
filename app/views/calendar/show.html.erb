@@ -1,21 +1,53 @@
 <% content_for(:title) { "Calendar - Family Hub" } %>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="container mx-auto px-4 py-6" data-controller="calendar" data-calendar-date-value="<%= @date %>" data-calendar-view-value="<%= @view %>">
+  <!-- Header -->
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-theme-text">Calendar</h1>
-    <%= link_to new_event_path, class: "btn btn-primary" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-      </svg>
-      New Event
-    <% end %>
+    <div class="flex items-center gap-4">
+      <h1 class="text-2xl font-bold text-theme-text" data-calendar-target="dateDisplay"></h1>
+      <button type="button" class="btn btn-secondary text-sm" data-action="calendar#today">Today</button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- Navigation -->
+      <button type="button" class="btn btn-icon" data-action="calendar#navigate" data-direction="prev">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <button type="button" class="btn btn-icon" data-action="calendar#navigate" data-direction="next">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+      <!-- View Toggle -->
+      <div class="flex rounded-card bg-theme-surface p-1 ml-4">
+        <% %w[month week day].each do |view| %>
+          <button type="button"
+                  class="px-3 py-1 text-sm rounded-button <%= @view == view ? 'bg-theme-primary text-white' : 'text-theme-text hover:bg-theme-surface' %>"
+                  data-action="calendar#changeView"
+                  data-view="<%= view %>">
+            <%= view.capitalize %>
+          </button>
+        <% end %>
+      </div>
+
+      <!-- New Event Button -->
+      <%= link_to new_event_path, class: "btn btn-primary ml-4", data: { turbo_frame: "modal" } do %>
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        New Event
+      <% end %>
+    </div>
   </div>
 
-  <div class="card p-8 text-center text-theme-secondary">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-    <h3 class="text-lg font-medium text-theme-text mb-2">Calendar view coming soon</h3>
-    <p>A full calendar with monthly view will be implemented here.</p>
-  </div>
+  <!-- Calendar Frame -->
+  <%= turbo_frame_tag "calendar-frame" do %>
+    <%= render "calendar/#{@view}_view", date: @date, events: @events %>
+  <% end %>
 </div>
+
+<!-- Modal for event forms -->
+<%= turbo_frame_tag "modal" %>

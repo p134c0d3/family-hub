@@ -1,0 +1,18 @@
+<%= month_calendar(events: events, start_date: date) do |date, day_events| %>
+  <div class="min-h-24 p-1 border-b border-r border-theme-border cursor-pointer hover:bg-theme-surface/50"
+       data-action="click->calendar#openEventModal"
+       data-start-at="<%= date.to_datetime.iso8601 %>">
+    <div class="text-sm font-medium <%= date.today? ? 'bg-theme-primary text-white rounded-full w-7 h-7 flex items-center justify-center' : 'text-theme-text' %>">
+      <%= date.day %>
+    </div>
+
+    <div class="space-y-1 mt-1">
+      <% day_events.first(3).each do |event| %>
+        <%= render 'events/event_pill', event: event %>
+      <% end %>
+      <% if day_events.size > 3 %>
+        <div class="text-xs text-theme-text/60">+<%= day_events.size - 3 %> more</div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

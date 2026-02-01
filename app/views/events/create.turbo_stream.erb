@@ -1,0 +1,27 @@
+<%# Turbo Stream response for event creation %>
+<%= turbo_stream.prepend "calendar-events" do %>
+  <%= render @event %>
+<% end %>
+
+<%= turbo_stream.update "modal" do %>
+  <div class="fixed inset-0 bg-theme-background/80 flex items-center justify-center p-4" data-controller="modal">
+    <div class="bg-theme-surface rounded-[15px] p-6 max-w-md w-full">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-theme-text">Event Created</h3>
+          <p class="text-sm text-theme-secondary"><%= @event.title %> has been added to the calendar.</p>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary w-full" data-action="modal#close">Close</button>
+    </div>
+  </div>
+<% end %>
+
+<%= turbo_stream.replace "calendar-frame" do %>
+  <%= render "calendar/month_view", date: @event.start_at.to_date, events: Event.visible_to(current_user).between(@event.start_at.beginning_of_month, @event.start_at.end_of_month) %>
+<% end %>

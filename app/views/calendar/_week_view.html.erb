@@ -1,0 +1,22 @@
+<%= week_calendar(events: events, start_date: date) do |date, day_events| %>
+  <div class="flex flex-col border-r border-theme-border last:border-r-0">
+    <!-- Day header -->
+    <div class="p-2 border-b border-theme-border bg-theme-surface">
+      <div class="text-center">
+        <div class="text-xs text-theme-secondary font-medium"><%= date.strftime('%a') %></div>
+        <div class="text-sm font-semibold <%= date.today? ? 'bg-theme-primary text-white rounded-full w-7 h-7 flex items-center justify-center mx-auto mt-1' : 'text-theme-text' %>">
+          <%= date.day %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events for this day -->
+    <div class="flex-1 p-2 space-y-1 cursor-pointer hover:bg-theme-surface/50"
+         data-action="click->calendar#openEventModal"
+         data-start-at="<%= date.to_datetime.iso8601 %>">
+      <% day_events.each do |event| %>
+        <%= render 'events/event_pill', event: event %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

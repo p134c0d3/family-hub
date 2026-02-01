@@ -30,6 +30,9 @@ Rails.application.routes.draw do
   resource :profile, only: [:show, :edit, :update] do
     patch :update_color_mode, on: :member
     patch :update_avatar, on: :member
+    patch :update_password, on: :member
+    patch :update_notifications, on: :member
+    patch :update_theme, on: :member
   end
 
   # Settings
@@ -71,6 +74,14 @@ Rails.application.routes.draw do
     resources :reactions, only: [:create, :destroy], controller: "media_reactions"
   end
 
+  # Theme Gallery
+  resources :theme_gallery, only: [:index] do
+    member do
+      get :preview
+      post :select
+    end
+  end
+
   # Admin namespace
   namespace :admin do
     get "/", to: "dashboard#show", as: :dashboard
@@ -90,7 +101,12 @@ Rails.application.routes.draw do
         post :reset_password
       end
     end
-    resources :themes
+    resources :themes do
+      member do
+        post :set_default
+        get :preview
+      end
+    end
     get "analytics", to: "analytics#index"
   end
 

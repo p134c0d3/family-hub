@@ -1,0 +1,90 @@
+<%# Event form modal with all fields %>
+<%= form_with model: event, class: "space-y-4", data: { controller: "event-form" } do |f| %>
+  <% if event.errors.any? %>
+    <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-[15px]">
+      <ul class="list-disc list-inside">
+        <% event.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :title, class: "form-label" %>
+    <%= f.text_field :title, class: "input", required: true, autofocus: true, placeholder: "Event title" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :description, class: "form-label" %>
+    <%= f.text_area :description, class: "input", rows: 3, placeholder: "Add description..." %>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div class="form-group">
+      <%= f.label :start_at, "Start", class: "form-label" %>
+      <%= f.datetime_local_field :start_at, class: "input", required: true %>
+    </div>
+    <div class="form-group">
+      <%= f.label :end_at, "End", class: "form-label" %>
+      <%= f.datetime_local_field :end_at, class: "input" %>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <%= f.check_box :all_day, class: "checkbox", data: { action: "event-form#toggleAllDay" } %>
+      <span class="text-sm text-theme-text">All day</span>
+    </label>
+  </div>
+
+  <!-- Color Picker -->
+  <div class="form-group">
+    <%= f.label :color, class: "form-label" %>
+    <div class="flex items-center gap-2">
+      <div class="color-preview w-8 h-8 rounded-[15px] border border-theme-border" style="background-color: <%= event.color || '#3b82f6' %>"></div>
+      <%= f.color_field :color, class: "w-12 h-8 rounded-[15px] cursor-pointer", value: event.color || '#3b82f6' %>
+      <div class="flex gap-1">
+        <% %w[#3b82f6 #10b981 #f59e0b #ef4444 #8b5cf6 #ec4899].each do |color| %>
+          <button type="button"
+                  class="w-6 h-6 rounded-full border-2 border-transparent hover:border-theme-text/30"
+                  style="background-color: <%= color %>"
+                  data-action="event-form#setColor"
+                  data-color="<%= color %>"></button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visibility -->
+  <div class="form-group">
+    <%= f.label :visibility, class: "form-label" %>
+    <div class="flex gap-4">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <%= f.radio_button :visibility, 'public', class: "radio", checked: event.visibility == 'public' || event.new_record? %>
+        <span class="text-sm">Public (visible to all)</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer">
+        <%= f.radio_button :visibility, 'private', class: "radio" %>
+        <span class="text-sm">Private (only me)</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Recurrence -->
+  <div class="form-group">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <%= check_box_tag :recurring, '1', event.recurring?, class: "checkbox", data: { action: "event-form#toggleRecurrence", "event-form-target": "recurrenceToggle" } %>
+      <span class="text-sm text-theme-text">Repeat</span>
+    </label>
+
+    <div data-event-form-target="recurrenceFields" class="<%= 'hidden' unless event.recurring? %> mt-3 pl-6 space-y-3">
+      <%= render 'events/recurrence_fields', f: f, event: event %>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-2 pt-4 border-t border-theme-border">
+    <button type="button" class="btn btn-secondary" data-action="modal#close">Cancel</button>
+    <%= f.submit event.persisted? ? 'Update Event' : 'Create Event', class: "btn btn-primary" %>
+  </div>
+<% end %>

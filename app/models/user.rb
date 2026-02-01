@@ -24,6 +24,7 @@ class User < ApplicationRecord
 
   # Theme preference
   belongs_to :selected_theme, class_name: 'Theme', optional: true
+  belongs_to :theme, optional: true
 
   # Chat associations
   has_many :chat_memberships, dependent: :destroy
@@ -37,9 +38,13 @@ class User < ApplicationRecord
   has_many :notifications, dependent: :destroy
   has_many :triggered_notifications, class_name: 'Notification', foreign_key: :actor_id, dependent: :destroy
 
+  # Event associations
+  has_many :created_events, class_name: 'Event', foreign_key: 'created_by_id'
+  has_many :event_rsvps, dependent: :destroy
+  has_many :rsvp_events, through: :event_rsvps, source: :event
+  has_many :event_reminders, dependent: :destroy
+
   # Future associations (defined when models are created)
-  # has_many :events, foreign_key: :created_by_id, dependent: :nullify
-  # has_many :event_rsvps, dependent: :destroy
   # has_many :media_items, foreign_key: :uploaded_by_id, dependent: :nullify
 
   # Validations
@@ -59,6 +64,10 @@ class User < ApplicationRecord
 
   validates :password, length: { minimum: 8 }, if: -> { password.present? }
 
+  # Profile validations
+  validates :phone, format: { with: /\A[\d\s\-\+\(\)]+\z/, allow_blank: true }
+  validates :birthday, comparison: { less_than: Date.current }, allow_nil: true
+
   # Callbacks
   before_validation :normalize_email
   before_create :set_first_user_as_admin
@@ -70,6 +79,13 @@ class User < ApplicationRecord
   scope :admins, -> { where(role: 'admin') }
   scope :members, -> { where(role: 'member') }
   scope :searchable, -> { active.where.not(status: 'removed') }
+
+  # Notification preferences defaults
+  NOTIFICATION_DEFAULTS = {
+    'event_reminders' => true,
+    'event_rsvp_updates' => true,
+    'event_invitations' => true
+  }.freeze
 
   # Instance methods
 
@@ -160,6 +176,17 @@ class User < ApplicationRecord
   # Get unread notification count
   def unread_notifications_count
     notifications.unread.count
+  end
+
+  # Check if notification type is enabled
+  def notification_enabled?(type)
+    prefs = notification_preferences.presence || NOTIFICATION_DEFAULTS
+    prefs[type.to_s] != false
+  end
+
+  # Get effective theme (user's theme or default)
+  def effective_theme
+    theme || Theme.default_theme || Theme.first
   end
 
   # Generate a temporary password

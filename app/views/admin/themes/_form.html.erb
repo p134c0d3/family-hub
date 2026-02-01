@@ -1,0 +1,256 @@
+<%= form_with model: [:admin, theme], class: "space-y-6", data: { controller: "theme-picker" } do |f| %>
+  <div class="grid grid-cols-3 gap-6">
+    <!-- Left: Form Fields -->
+    <div class="col-span-2 space-y-6">
+      <!-- Theme Details -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Theme Details</h2>
+
+        <% if theme.errors.any? %>
+          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-[15px] p-4 mb-4">
+            <div class="flex items-center gap-2 text-red-800 dark:text-red-200 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="font-medium">Please fix the following errors:</span>
+            </div>
+            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+              <% theme.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="space-y-4">
+          <div>
+            <%= f.label :name, class: "label" %>
+            <%= f.text_field :name, class: "input", required: true, placeholder: "Ocean Blue" %>
+          </div>
+
+          <div>
+            <%= f.label :description, class: "label" %>
+            <%= f.text_area :description, class: "input", rows: 2, placeholder: "A calming theme with blue tones..." %>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <%= f.check_box :is_active, class: "checkbox" %>
+            <%= f.label :is_active, "Active (visible to users)", class: "text-sm text-theme-text" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Colors -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Core Colors</h2>
+        <div class="grid grid-cols-3 gap-4">
+          <% %w[primary secondary accent].each do |color_key| %>
+            <div>
+              <label class="label text-sm"><%= color_key.titleize %></label>
+              <div class="flex items-center gap-2">
+                <!-- Color preview swatch -->
+                <div class="w-10 h-10 rounded-lg border-2 border-theme-border flex-shrink-0"
+                     data-preview-for="<%= color_key %>"
+                     style="background-color: <%= theme.colors[color_key] || Theme.default_colors[color_key] %>"></div>
+
+                <!-- Color picker input -->
+                <input type="text"
+                       name="theme[colors][<%= color_key %>]"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input flex-1 coloris-input"
+                       data-theme-picker-target="colorInput"
+                       data-color-key="<%= color_key %>">
+
+                <!-- Hex input -->
+                <input type="text"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input w-24 font-mono text-sm"
+                       placeholder="#000000"
+                       data-hex-for="<%= color_key %>"
+                       data-action="input->theme-picker#updateFromHex">
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- UI Colors -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">UI Colors</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <% %w[background surface text border].each do |color_key| %>
+            <div>
+              <label class="label text-sm"><%= color_key.titleize %></label>
+              <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-lg border-2 border-theme-border flex-shrink-0"
+                     data-preview-for="<%= color_key %>"
+                     style="background-color: <%= theme.colors[color_key] || Theme.default_colors[color_key] %>"></div>
+
+                <input type="text"
+                       name="theme[colors][<%= color_key %>]"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input flex-1 coloris-input"
+                       data-theme-picker-target="colorInput"
+                       data-color-key="<%= color_key %>">
+
+                <input type="text"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input w-24 font-mono text-sm"
+                       placeholder="#000000"
+                       data-hex-for="<%= color_key %>"
+                       data-action="input->theme-picker#updateFromHex">
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Semantic Colors -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Semantic Colors</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <% %w[success warning error info].each do |color_key| %>
+            <div>
+              <label class="label text-sm"><%= color_key.titleize %></label>
+              <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-lg border-2 border-theme-border flex-shrink-0"
+                     data-preview-for="<%= color_key %>"
+                     style="background-color: <%= theme.colors[color_key] || Theme.default_colors[color_key] %>"></div>
+
+                <input type="text"
+                       name="theme[colors][<%= color_key %>]"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input flex-1 coloris-input"
+                       data-theme-picker-target="colorInput"
+                       data-color-key="<%= color_key %>">
+
+                <input type="text"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input w-24 font-mono text-sm"
+                       placeholder="#000000"
+                       data-hex-for="<%= color_key %>"
+                       data-action="input->theme-picker#updateFromHex">
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Additional Colors -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Additional Colors</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <% %w[shadow].each do |color_key| %>
+            <div>
+              <label class="label text-sm"><%= color_key.titleize %></label>
+              <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-lg border-2 border-theme-border flex-shrink-0"
+                     data-preview-for="<%= color_key %>"
+                     style="background-color: <%= theme.colors[color_key] || Theme.default_colors[color_key] %>"></div>
+
+                <input type="text"
+                       name="theme[colors][<%= color_key %>]"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input flex-1"
+                       placeholder="rgba(0,0,0,0.1)">
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Dark Mode Overrides -->
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Dark Mode Overrides</h2>
+        <p class="text-sm text-theme-secondary mb-4">These colors will be used when dark mode is enabled.</p>
+        <div class="grid grid-cols-2 gap-4">
+          <% %w[primary_dark secondary_dark accent_dark background_dark surface_dark text_dark].each do |color_key| %>
+            <div>
+              <label class="label text-sm"><%= color_key.titleize %></label>
+              <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-lg border-2 border-theme-border flex-shrink-0"
+                     data-preview-for="<%= color_key %>"
+                     style="background-color: <%= theme.colors[color_key] || Theme.default_colors[color_key] %>"></div>
+
+                <input type="text"
+                       name="theme[colors][<%= color_key %>]"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input flex-1 coloris-input"
+                       data-theme-picker-target="colorInput"
+                       data-color-key="<%= color_key %>">
+
+                <input type="text"
+                       value="<%= theme.colors[color_key] || Theme.default_colors[color_key] %>"
+                       class="input w-24 font-mono text-sm"
+                       placeholder="#000000"
+                       data-hex-for="<%= color_key %>"
+                       data-action="input->theme-picker#updateFromHex">
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Live Preview -->
+    <div class="col-span-1">
+      <div class="card p-6 sticky top-6" data-theme-picker-target="preview">
+        <h2 class="text-lg font-semibold text-theme-text mb-4">Live Preview</h2>
+
+        <div class="space-y-4">
+          <!-- Sample buttons -->
+          <div class="space-y-2">
+            <button type="button" class="btn btn-primary w-full">Primary Button</button>
+            <button type="button" class="btn btn-secondary w-full">Secondary Button</button>
+          </div>
+
+          <!-- Sample card -->
+          <div class="bg-theme-surface rounded-[15px] p-4 border border-theme-border">
+            <h3 class="font-medium text-theme-text">Sample Card</h3>
+            <p class="text-sm text-theme-secondary mt-1">This is how content will look.</p>
+          </div>
+
+          <!-- Sample input -->
+          <div>
+            <label class="label text-sm">Sample Input</label>
+            <input type="text" class="input" placeholder="Type here..." />
+          </div>
+
+          <!-- Status colors -->
+          <div class="grid grid-cols-2 gap-2">
+            <span class="px-2 py-1 rounded-lg text-xs text-center font-medium text-white" style="background-color: var(--color-success, #10b981)">Success</span>
+            <span class="px-2 py-1 rounded-lg text-xs text-center font-medium text-white" style="background-color: var(--color-warning, #f59e0b)">Warning</span>
+            <span class="px-2 py-1 rounded-lg text-xs text-center font-medium text-white" style="background-color: var(--color-error, #ef4444)">Error</span>
+            <span class="px-2 py-1 rounded-lg text-xs text-center font-medium text-white" style="background-color: var(--color-info, #3b82f6)">Info</span>
+          </div>
+
+          <!-- Color palette -->
+          <div>
+            <p class="label text-sm mb-2">Color Palette</p>
+            <div class="grid grid-cols-3 gap-2">
+              <% %w[primary secondary accent].each do |key| %>
+                <div>
+                  <div class="w-full aspect-square rounded-lg border border-theme-border"
+                       style="background-color: var(--color-<%= key.dasherize %>, <%= Theme.default_colors[key] %>)"></div>
+                  <p class="text-xs text-theme-secondary mt-1 text-center"><%= key.titleize %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-theme-border">
+          <button type="button" class="btn btn-secondary w-full text-sm" data-action="theme-picker#resetPreview">
+            Reset Preview
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex justify-end gap-2 pt-6 border-t border-theme-border">
+    <%= link_to "Cancel", admin_themes_path, class: "btn btn-secondary" %>
+    <%= f.submit theme.persisted? ? 'Update Theme' : 'Create Theme', class: "btn btn-primary" %>
+  </div>
+<% end %>

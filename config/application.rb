@@ -37,5 +37,8 @@ module FamilyHub
 
     # Autoload service objects
     config.autoload_paths << Rails.root.join("app/services")
+
+    # Use Solid Queue for Active Job
+    config.active_job.queue_adapter = :solid_queue
   end
 end
